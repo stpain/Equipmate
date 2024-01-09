@@ -21,7 +21,7 @@
                 </HighlightTexture>
             </Button>
 
-            <Frame parentKey="characterHelptip" inherits="AdventureHelpTipTemplate_NoArrow" hidden="true">
+            <Frame parentKey="characterHelptip" inherits="TBDHelpTipTemplate_NoArrow" hidden="true">
                 <Anchors>
                     <Anchor point="TOPRIGHT" x="-60" y="-60"/>
                 </Anchors>
