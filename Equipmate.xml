@@ -1,27 +1,16 @@
 <Ui>
-    <Frame name="EquipmateUI" mixin="EquipmateMixin" parent="UIParent" inherits="PortraitFrameTemplate" frameStrata="HIGH" enableMouse="true" movable="true">
+    <Frame name="EquipmateUI" mixin="EquipmateMixin" parent="UIParent" inherits="ButtonFrameTemplate" frameStrata="HIGH" enableMouse="true" movable="true">
 
-
+        <Size x="300" y="530"/>
+        <Anchors>
+            <Anchor point="CENTER" x="0" y="0"/>
+        </Anchors>
 
         <Frames>
-            <Button parentKey="selectOutfitDropdown" inherits="TBDDropDownTemplate"  text="New Outfit">
-                <Size x="154" y="34"/>
-                <Anchors>
-                    <Anchor point="TOPRIGHT" x="-45" y="-55"/>
-                </Anchors>
-            </Button>
-
-            <Button parentKey="deleteOutfit">
-                <Size x="18" y="18"/>
-                <Anchors>
-                    <Anchor point="RIGHT" relativeKey="$parent.selectOutfitDropdown" relativePoint="LEFT" x="-5" y="0"/>
-                </Anchors>
-                <NormalTexture atlas="communities-icon-redx"/>
-            </Button>
 
             <Button parentKey="outfitHelptip" inherits="MainHelpPlateButton">
                 <Anchors>
-                    <Anchor point="LEFT" relativeKey="$parent.selectOutfitDropdown" relativePoint="RIGHT" x="-10" y="0"/>
+                    <Anchor point="TOPLEFT" x="36" y="20"/>
                 </Anchors>
                 <HighlightTexture file="Interface\common\help-i" alphaMode="ADD" hidden="true">
                     <Size x="46" y="46"/>
@@ -32,22 +21,65 @@
                 </HighlightTexture>
             </Button>
 
-            <Frame parentKey="equipmentListview" inherits="TBDListviewTemplate">
-                <Size x="214"/>
+            <Frame parentKey="characterHelptip" inherits="AdventureHelpTipTemplate_NoArrow" hidden="true">
                 <Anchors>
-                    <Anchor point="TOPRIGHT" x="-20" y="-90"/>
-                    <Anchor point="BOTTOMRIGHT" x="-20" y="30"/>
+                    <Anchor point="TOPRIGHT" x="-60" y="-60"/>
+                </Anchors>
+                <Size x="300" y="230"/>
+            </Frame>
+
+            <Button parentKey="selectOutfitDropdown" inherits="TBDDropDownTemplate"  text="New Outfit">
+                <Size x="160" y="34"/>
+                <Anchors>
+                    <Anchor point="TOP" x="5" y="-25"/>
+                </Anchors>
+            </Button>
+
+            <Button parentKey="outfitConfig">
+                <Size x="28" y="28"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativeKey="$parent.selectOutfitDropdown" relativePoint="RIGHT" x="10" y="0"/>
+                </Anchors>
+                <NormalTexture file="Interface\WorldMap\Gear_64">
+                    <TexCoords left="0" top="0" right="0.5" bottom="0.5"/>
+                </NormalTexture>
+                <HighlightTexture file="Interface\WorldMap\Gear_64">
+                    <TexCoords left="0.5" top="0" right="1" bottom="0.5"/>
+                </HighlightTexture>
+            </Button>
+
+
+            <Frame parentKey="equipmentListview" inherits="TBDListviewTemplate">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parentInset" x="0" y="-2"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$parentInset" x="0" y="2"/>
                 </Anchors>
                 <KeyValues>
                     <KeyValue key="frameType" value="FRAME" type="string"/>
                     <KeyValue key="itemTemplate" value="TBDSimpleIconLabelFrame" type="string"/>
-                    <KeyValue key="elementHeight" value="20" type="number"/>
+                    <KeyValue key="elementHeight" value="22" type="number"/>
                 </KeyValues>
             </Frame>
-            <Button parentKey="equipOutfit" inherits="UIPanelButtonTemplate" text="Equip">
-                <Size x="100" y="22"/>
+
+            <Button parentKey="newOutfit" inherits="UIPanelButtonTemplate" text="New">
+                <Size x="98" y="22"/>
                 <Anchors>
-                    <Anchor point="TOP" relativeKey="$parent.equipmentListview" relativePoint="BOTTOM" x="0" y="-5"/>
+                    <Anchor point="BOTTOMLEFT" x="3" y="4"/>
+                </Anchors>
+            </Button>
+
+            <Button parentKey="deleteOutfit" inherits="UIPanelButtonTemplate" text="Delete">
+                <Size x="98" y="22"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativeKey="$parent.newOutfit" relativePoint="RIGHT" x="0" y="0"/>
+                </Anchors>
+            </Button>
+
+            <Button parentKey="equipOutfit" inherits="UIPanelButtonTemplate" text="Equip">
+                <Size y="22"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativeKey="$parent.deleteOutfit" relativePoint="RIGHT" x="0" y="0"/>
+                    <Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
                 </Anchors>
             </Button>
         </Frames>
@@ -55,6 +87,7 @@
         <Scripts>
             <OnLoad method="OnLoad"/>
             <OnShow method="OnShow"/>
+            <OnEvent method="OnEvent"/>
             <OnDragStart>
                 self:StartMoving()
             </OnDragStart>

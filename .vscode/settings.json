@@ -15,6 +15,17 @@
         "CreateScrollBoxListTreeListView",
         "CreateAnchor",
         "CreateRadioButtonGroup",
-        "ButtonGroupBaseMixin"
+        "ButtonGroupBaseMixin",
+        "GameFontNormalSmall",
+        "StaticPopup_Show",
+        "BankFrame",
+        "EasyMenu",
+        "IGNORE",
+        "StaticPopupDialogs",
+        "ACCEPT",
+        "CANCEL",
+        "GameFontWhite",
+        "GameTooltip_SetDefaultAnchor",
+        "SlashCmdList"
     ]
 }
