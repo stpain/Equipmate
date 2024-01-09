@@ -1,0 +1,20 @@
+{
+    "Lua.diagnostics.globals": [
+        "DEFAULT_CHAT_FRAME",
+        "WorldMapFrame",
+        "CreateFramePool",
+        "FramePool_HideAndClearAnchors",
+        "MapCanvasDataProviderMixin",
+        "MapCanvasPinMixin",
+        "MouseIsOver",
+        "NineSliceUtil",
+        "ScrollUtil",
+        "CreateDataProvider",
+        "CreateScrollBoxListLinearView",
+        "GenerateClosure",
+        "CreateScrollBoxListTreeListView",
+        "CreateAnchor",
+        "CreateRadioButtonGroup",
+        "ButtonGroupBaseMixin"
+    ]
+}
