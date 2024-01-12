@@ -176,3 +176,68 @@ function TBDSimpleIconLabelFrameMixin:ResetDataBinding()
     self.rightButton:SetScript("OnClick", nil)
     self.rightButton:Hide()
 end
+
+
+
+TBDSquareSlotButtonMixin = {}
+function TBDSquareSlotButtonMixin:OnLoad()
+    if self.tooltipText then
+        self:SetScript("OnEnter", function()
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine(self.tooltipText)
+            GameTooltip:Show()
+        end)
+    end
+end
+
+
+
+
+
+EquipmentFlyoutButtonMixin = {}
+function EquipmentFlyoutButtonMixin:OnLoad()
+    
+end
+function EquipmentFlyoutButtonMixin:SetTooltip(text)
+    self:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:AddLine(text)
+        GameTooltip:Show()
+    end)
+end
+function EquipmentFlyoutButtonMixin:SetItem(item)
+    if item.icon and item.link then
+
+        local itemMixin = Item:CreateFromItemLink(item.link)
+        if not itemMixin:IsItemEmpty() then
+            itemMixin:ContinueOnItemLoad(function()
+                local quality = itemMixin:GetItemQuality()
+                self.quality:SetAtlas(Equipmate.Constants.ItemQualityAtlas[quality])
+            end)
+        end
+
+
+        self.icon:SetTexture(item.icon)
+        self:SetScript("OnEnter", function()
+            GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+            GameTooltip:SetHyperlink(item.link)
+            GameTooltip:Show()
+        end)
+        self:Show()
+    end
+    if item.bag and item.slot then
+        self:SetScript("OnClick", function()
+            C_Container.PickupContainerItem(item.bag, item.slot)
+            PickupInventoryItem(item.invSlotID)
+
+            if CursorHasItem() then
+                C_Container.PickupContainerItem(item.bag, item.slot)
+            end
+        end)
+    end
+end
+function EquipmentFlyoutButtonMixin:ClearItem()
+    self:SetScript("OnEnter", nil)
+    self.icon:SetTexture(nil)
+end
+

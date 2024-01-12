@@ -31,13 +31,29 @@ Equipmate.ContextMenuSeparator = {
 }
 
 Equipmate.Constants = {}
-Equipmate.Constants.Events = {
+
+Equipmate.Constants.PaperDollInventorySlotToggleButtons = {}
+
+Equipmate.Constants.BlizzardEvents = {
+    AddonLoaded = "ADDON_LOADED",
+    PlayerEnteringWorld = "PLAYER_ENTERING_WORLD"
+}
+
+Equipmate.Constants.CallbackEvents = {
     "Database_OnInitialised",
     "Database_OnConfigChanged",
     "Database_OnNewOutfit",
     "Database_OnOutfitChanged",
     "Database_OnOutfitDeleted",
 }
+
+Equipmate.Constants.ItemQualityAtlas = {
+    [2] = "bags-glow-green",
+    [3] = "bags-glow-blue",
+    [4] = "bags-glow-purple",
+    [5] = "bags-glow-orange",
+}
+
 Equipmate.Constants.InventorySlots = {
     {
         slot = "HEADSLOT",
@@ -119,4 +135,82 @@ Equipmate.Constants.InventorySlots = {
     --     slot = "RELICSLOT",
     --     icon = 136522,
     -- },
+}
+
+Equipmate.Constants.PaperDollSlotNames = {    
+    ["CharacterHeadSlot"] = { allignment = "right", slotID = 1, },
+    ["CharacterNeckSlot"] = { allignment = "right", slotID = 2, },
+    ["CharacterShoulderSlot"] = { allignment = "right", slotID = 3, },
+    ["CharacterBackSlot"] = { allignment = "right", slotID = 15, },
+    ["CharacterChestSlot"] = { allignment = "right", slotID = 5, },
+    ["CharacterShirtSlot"] = { allignment = "right", slotID = 4, },
+    ["CharacterTabardSlot"] = { allignment = "right", slotID = 19, },
+    ["CharacterWristSlot"] = { allignment = "right", slotID = 9, },
+
+    ["CharacterHandsSlot"] = { allignment = "right", slotID = 10, },
+    ["CharacterWaistSlot"] = { allignment = "right", slotID = 6, },
+    ["CharacterLegsSlot"] = { allignment = "right", slotID = 7, },
+    ["CharacterFeetSlot"] = { allignment = "right", slotID = 8, },
+    ["CharacterFinger0Slot"] = { allignment = "right", slotID = 11, },
+    ["CharacterFinger1Slot"] = { allignment = "right", slotID = 12, },
+    ["CharacterTrinket0Slot"] = { allignment = "right", slotID = 13, },
+    ["CharacterTrinket1Slot"] = { allignment = "right", slotID = 14, },
+
+    ["CharacterMainHandSlot"] = { allignment = "bottom", slotID = 16, },
+    ["CharacterSecondaryHandSlot"] = { allignment = "bottom", slotID = 17, },
+    ["CharacterRangedSlot"] = { allignment = "bottom", slotID = 18, },
+}
+
+Equipmate.Constants.GlobalNameToInvSlot = {
+    ["INVTYPE_HEAD"] = 1,
+    ["INVTYPE_SHOULDER"] = 3,
+    ["INVTYPE_BODY"] = 4,
+    ["INVTYPE_CHEST"] = 5,
+    ["INVTYPE_ROBE"] = 5,
+    ["INVTYPE_WAIST"] = 6,
+    ["INVTYPE_LEGS"] = 7,
+    ["INVTYPE_FEET"] = 8,
+    ["INVTYPE_WRIST"] = 9,
+    ["INVTYPE_HAND"] = 10,
+    ["INVTYPE_CLOAK"] = 15,
+    ["INVTYPE_MAINHAND"] = 16,
+    ["INVTYPE_OFFHAND"] = 17,
+    ["INVTYPE_RANGED"] = 18,
+    ["INVTYPE_RANGEDRIGHT"] = 18,
+    ["INVTYPE_TABARD"] = 19,
+    ["INVTYPE_WEAPON"] = 16,
+    ["INVTYPE_2HWEAPON"] = 16,
+    ["INVTYPE_WEAPONMAINHAND"] = 16,
+    ["INVTYPE_WEAPONOFFHAND"] = 17,
+    ["INVTYPE_SHIELD"] = 17,
+    ["INVTYPE_HOLDABLE"] = 17,
+    ["INVTYPE_FINGER"] = {11, 12},
+    ["INVTYPE_TRINKET"] = {13, 14},
+}
+
+Equipmate.Constants.ClassIdArmorType = {
+    [1] = 4, --warrior
+    [2] = 4, --paladin
+    [3] = 3, --hunter
+    [4] = 2, --rogue
+    [5] = 1, --priest
+    [6] = 4, --dk
+    [7] = 3, --shaman
+    [8] = 1, --mage
+    [9] = 1, --warlocki
+    [10] = 2, --monk
+    [11] = 2, --druid
+    [12] = 2, --dh
+}
+
+Equipmate.Constants.FlyoutButtonsFrameLayout = {
+    TopLeftCorner =	{ atlas = "ChatBubble-NineSlice-CornerTopLeft", x = -2, y = 2, },
+    TopRightCorner =	{ atlas = "ChatBubble-NineSlice-CornerTopRight", x = 2, y = 2, },
+    BottomLeftCorner =	{ atlas = "ChatBubble-NineSlice-CornerBottomLeft", x = -2, y = -2, },
+    BottomRightCorner =	{ atlas = "ChatBubble-NineSlice-CornerBottomRight", x = 2, y = -2, },
+    TopEdge = { atlas = "_ChatBubble-NineSlice-EdgeTop", },
+    BottomEdge = { atlas = "_ChatBubble-NineSlice-EdgeBottom"},
+    LeftEdge = { atlas = "!ChatBubble-NineSlice-EdgeLeft", },
+    RightEdge = { atlas = "!ChatBubble-NineSlice-EdgeRight", },
+    Center = { atlas = "ChatBubble-NineSlice-Center", },
 }

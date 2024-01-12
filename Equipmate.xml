@@ -1,9 +1,47 @@
 <Ui>
-    <Frame name="EquipmateUI" mixin="EquipmateMixin" parent="UIParent" inherits="ButtonFrameTemplate" frameStrata="HIGH" enableMouse="true" movable="true">
 
-        <Size x="300" y="530"/>
+    <GameTooltip name="EquipmateScanningTooltip" inherits="GameTooltipTemplate">
+        <Scripts>
+            <OnLoad inherit="prepend">
+                self:SetOwner(WorldFrame, "ANCHOR_NONE")
+            </OnLoad>
+        </Scripts>
+    </GameTooltip>
+
+    <Frame name="EquipmentFlyoutFrame" mixin="EquipmentFlyoutFrameMixin" hidden="true" enableMouse="false" frameLevel="9998" frameStrata="TOOLTIP">
+		<Size x="43" y="43"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture parentKey="Highlight" name="$parentHighlight" file="Interface\PaperDollInfoFrame\UI-GearManager-ItemButton-Highlight">
+					<Size x="50" y="50"/>
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset x="-4" y="0"/>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0" right="0.78125" top="0" bottom="0.78125"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Frame frameStrata="TOOLTIP" frameLevel="9999" enableMouse="true" parentKey="buttonFrame" clampedToScreen="true">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT"/>
+				</Anchors>
+			</Frame>
+		</Frames>
+		<Scripts>
+            <OnLoad method="OnLoad"/>
+            <OnShow method="OnShow"/>
+		</Scripts>
+	</Frame>
+
+
+    <Frame name="EquipmateUI" mixin="EquipmateMixin" parent="PaperDollFrame" inherits="ButtonFrameTemplate" frameStrata="HIGH" enableMouse="true">
+
+        <Size x="300" y="400"/>
         <Anchors>
-            <Anchor point="CENTER" x="0" y="0"/>
+            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="0" y="-11"/>
         </Anchors>
 
         <Frames>
@@ -29,30 +67,35 @@
             </Frame>
 
             <Button parentKey="selectOutfitDropdown" inherits="TBDDropDownTemplate"  text="New Outfit">
-                <Size x="160" y="34"/>
+                <Size x="140" y="34"/>
                 <Anchors>
-                    <Anchor point="TOP" x="5" y="-25"/>
+                    <Anchor point="TOP" x="-20" y="-26"/>
                 </Anchors>
             </Button>
 
-            <Button parentKey="outfitConfig">
-                <Size x="28" y="28"/>
+            <Button parentKey="outfitConfig" inherits="TBDSquareSlotButton">
                 <Anchors>
-                    <Anchor point="LEFT" relativeKey="$parent.selectOutfitDropdown" relativePoint="RIGHT" x="10" y="0"/>
+                    <Anchor point="TOPRIGHT" x="-7" y="-26"/>
                 </Anchors>
-                <NormalTexture file="Interface\WorldMap\Gear_64">
-                    <TexCoords left="0" top="0" right="0.5" bottom="0.5"/>
-                </NormalTexture>
-                <HighlightTexture file="Interface\WorldMap\Gear_64">
-                    <TexCoords left="0.5" top="0" right="1" bottom="0.5"/>
-                </HighlightTexture>
+                <KeyValues>
+                    <KeyValue key="tooltipText" value="EQUIPMATE_TT_UI_OUTFIT_CONFIG_BUTTON" type="global"/>
+                </KeyValues>
+            </Button>
+
+            <Button parentKey="rescanOutfit" inherits="TBDSquareSlotButton">
+                <Anchors>
+                    <Anchor point="RIGHT" relativeKey="$parent.outfitConfig" relativePoint="LEFT" x="-4" y="0"/>
+                </Anchors>
+                <KeyValues>
+                    <KeyValue key="tooltipText" value="EQUIPMATE_TT_UI_RESCAN_BUTTON" type="global"/>
+                </KeyValues>
             </Button>
 
 
             <Frame parentKey="equipmentListview" inherits="TBDListviewTemplate">
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeTo="$parentInset" x="0" y="-2"/>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$parentInset" x="0" y="2"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$parentInset" x="-2" y="2"/>
                 </Anchors>
                 <KeyValues>
                     <KeyValue key="frameType" value="FRAME" type="string"/>

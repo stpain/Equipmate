@@ -26,6 +26,27 @@
         "CANCEL",
         "GameFontWhite",
         "GameTooltip_SetDefaultAnchor",
-        "SlashCmdList"
+        "SlashCmdList",
+        "EquipmentFlyoutFrame",
+        "SetItemButtonQuality",
+        "GameTooltip_ShowCompareItem",
+        "EquipmentManager_GetItemInfoByLocation",
+        "SetItemButtonTexture",
+        "SetItemButtonCount",
+        "CooldownFrame_Set",
+        "SetItemButtonTextureVertexColor",
+        "SetItemButtonNormalTextureVertexColor",
+        "EQUIPMENT_MANAGER_IGNORE_SLOT",
+        "EQUIPMENT_MANAGER_UNIGNORE_SLOT",
+        "EQUIPMENT_MANAGER_PLACE_IN_BAGS",
+        "CharacterFrame",
+        "PaperDollItemsFrame",
+        "EquipmentFlyoutPopoutButton_SetReversed",
+        "RuneFrame",
+        "PanelTemplates_SetNumTabs",
+        "PanelTemplates_SetTab",
+        "BOOKTYPE_SPELL",
+        "ITEM_QUALITY_COLORS",
+        "CharacterHandsSlot"
     ]
 }

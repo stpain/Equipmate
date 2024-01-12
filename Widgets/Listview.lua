@@ -24,7 +24,7 @@ function TBDListviewMixin:OnLoad()
 
     local anchorsWithBar = {
         CreateAnchor("TOPLEFT", self, "TOPLEFT", 1, -1),
-        CreateAnchor("BOTTOMRIGHT", self.scrollBar, "BOTTOMLEFT", -5, 1),
+        CreateAnchor("BOTTOMRIGHT", self.scrollBar, "BOTTOMLEFT", -12, 1),
     };
     local anchorsWithoutBar = {
         CreateAnchor("TOPLEFT", self, "TOPLEFT", 1, -1),

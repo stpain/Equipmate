@@ -4,8 +4,8 @@
             <Frame parentKey="scrollBox" inherits="WowScrollBoxList"/>
             <EventFrame parentKey="scrollBar" inherits="MinimalScrollBar">
                 <Anchors>
-                    <Anchor point="TOPRIGHT" x="-3"/>
-                    <Anchor point="BOTTOMRIGHT" x="-3"/>
+                    <Anchor point="TOPRIGHT" x="-8" y="-4"/>
+                    <Anchor point="BOTTOMRIGHT" x="-8" y="4"/>
                 </Anchors>
             </EventFrame>
         </Frames>
@@ -19,8 +19,8 @@
             <Frame parentKey="scrollBox" inherits="WowScrollBoxList"/>
             <EventFrame parentKey="scrollBar" inherits="MinimalScrollBar">
                 <Anchors>
-                    <Anchor point="TOPRIGHT" x="-3"/>
-                    <Anchor point="BOTTOMRIGHT" x="-3"/>
+                    <Anchor point="TOPRIGHT" x="-8" y="-4"/>
+                    <Anchor point="BOTTOMRIGHT" x="-8" y="4"/>
                 </Anchors>
             </EventFrame>
         </Frames>
@@ -34,8 +34,8 @@
             <Frame parentKey="scrollBox" inherits="WowScrollBoxList"/>
             <EventFrame parentKey="scrollBar" inherits="MinimalScrollBar">
                 <Anchors>
-                    <Anchor point="TOPRIGHT" x="-3"/>
-                    <Anchor point="BOTTOMRIGHT" x="-3"/>
+                    <Anchor point="TOPRIGHT" x="-8" y="-4"/>
+                    <Anchor point="BOTTOMRIGHT" x="-8" y="4"/>
                 </Anchors>
             </EventFrame>
         </Frames>

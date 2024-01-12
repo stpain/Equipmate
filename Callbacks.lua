@@ -1,3 +1,3 @@
 Equipmate.CallbackRegistry = CreateFromMixins(CallbackRegistryMixin)
 Equipmate.CallbackRegistry:OnLoad()
-Equipmate.CallbackRegistry:GenerateCallbackEvents(Equipmate.Constants.Events)
+Equipmate.CallbackRegistry:GenerateCallbackEvents(Equipmate.Constants.CallbackEvents)
