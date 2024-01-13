@@ -203,6 +203,22 @@ Equipmate.Constants.ClassIdArmorType = {
     [12] = 2, --dh
 }
 
+Equipmate.Constants.ItemSubClassIdToWeaponSkillSpellId = {
+    [Enum.ItemWeaponSubclass.Polearm] = 200,
+    [Enum.ItemWeaponSubclass.Sword1H] = 201,
+    [Enum.ItemWeaponSubclass.Sword2H] = 202,
+    [Enum.ItemWeaponSubclass.Axe1H] = 196,
+    [Enum.ItemWeaponSubclass.Axe2H] = 197,
+    [Enum.ItemWeaponSubclass.Mace1H] = 198,
+    [Enum.ItemWeaponSubclass.Mace2H] = 199,
+    [Enum.ItemWeaponSubclass.Staff] = 227,
+    [Enum.ItemWeaponSubclass.Dagger] = 1180,
+    [Enum.ItemWeaponSubclass.Wand] = 5009,
+    [Enum.ItemWeaponSubclass.Fishingpole] = 7738,
+    [Enum.ItemWeaponSubclass.Guns] = 266,
+    [Enum.ItemWeaponSubclass.Bows] = 264,
+}
+
 Equipmate.Constants.FlyoutButtonsFrameLayout = {
     TopLeftCorner =	{ atlas = "ChatBubble-NineSlice-CornerTopLeft", x = -2, y = 2, },
     TopRightCorner =	{ atlas = "ChatBubble-NineSlice-CornerTopRight", x = 2, y = 2, },

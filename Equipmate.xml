@@ -39,7 +39,7 @@
 
     <Frame name="EquipmateUI" mixin="EquipmateMixin" parent="PaperDollFrame" inherits="ButtonFrameTemplate" frameStrata="HIGH" enableMouse="true">
 
-        <Size x="300" y="400"/>
+        <Size x="300" y="420"/>
         <Anchors>
             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="0" y="-11"/>
         </Anchors>

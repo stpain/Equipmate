@@ -10,7 +10,7 @@ locales.enUS = {
     TT_UI_RESCAN_BUTTON = "Rescan equipment\n\n|cffffffffScan your characters equipment and update\nthe current outfit (if and outfit is selected)",
     TT_UI_OUTFIT_CONFIG_BUTTON = "Outfit config",
     
-    CHARACTER_HELPTIP = "You can manage your character's equipment here.\n\nCreate a new equipment set and give it a name.\n\nThe set will be created with your current gear loaded into the list. Right click a slot to view your available items.\n\nTo equip a set click on Equip, or use a macro \n/equipmate equip [set name] (set name cannot contain any spaces)\n\nWarning, items in the bank will require you to have the bank open.",
+    CHARACTER_HELPTIP = "You can manage your character's equipment here.\n\nCreate a new equipment set and give it a name.\n\nThe set will be created with your current gear loaded into the list.\n\nYou can view alternative items via the slot flyouts or manually change items. To save the set click 'Rescan'.\n\nTo equip a set click on Equip, or use a macro \n/equipmate equip [set name] (set name cannot contain any spaces)\n\nWarning, items in the bank will require you to have the bank open.",
 
     FLYOUT_IGNORE_SLOT = "Ignore slot",
     FLYOUT_PUT_IN_BAG = "Put item in bag",

@@ -37,47 +37,98 @@ function Equipmate.Api.GetPlayerEquipment()
     return equipment;
 end
 
----Scan the player containers for items that fit the specified inventory slot
----@param invSlot number the inventory slot ID
----@param includeBank boolean indicates if bank containers should be scanned
----@return table items an ipairs table of items
-function Equipmate.Api.GetItemsForInvSlot(invSlot, includeBank)
 
-    local items = {}
-    local _, _, classID = UnitClass("player")
+---Scan the players current skills to determine which equipment items can be used
+---@return table skills an ipairs table of skills
+function Equipmate.Api.ScanSkills()
+    local skills = {}
+    for i = 1, GetNumSkillLines() do
+        local name, _type, _, _, _ = GetSkillLineInfo(i)
 
-    local function checkItemInfo(link, bag, slot)
+        print(name, _type)
+    end
+    return skills;
+end
 
-        --print("checkign item", link)
 
-        local armorCheck = true;
-        local _, _, _, equipLoc, icon, itemClassID, itemSubClassID = GetItemInfoInstant(link)
-        if itemClassID == 2 or itemClassID == 4 then
-            --print(link, equipLoc)
-            if itemClassID == 4 then
+---Performs checks on the item provided to see if it fits the inventory slot and class/character skills
+---@param classID number classID
+---@param invSlot number paperedoll inventory slot ID
+---@param link string item hyperlink
+---@param bag number bagID
+---@param slot number slotID (bag)
+---@return boolean, table
+function Equipmate.Api.TestItemForClassAndSlot(classID, invSlot, link, bag, slot)
+
+    --print("checkign item", link)
+
+    local armorCheck, weaponCheck = true, true;
+    local _, _, _, equipLoc, icon, itemClassID, itemSubClassID = GetItemInfoInstant(link)
+    if itemClassID == 2 or itemClassID == 4 then
+        --print(link, equipLoc, itemClassID, itemSubClassID)
+
+        if itemClassID == 2 then
+            local weaponSpellID = Equipmate.Constants.ItemSubClassIdToWeaponSkillSpellId[itemSubClassID]
+            if weaponSpellID then
+                weaponCheck = IsPlayerSpell(weaponSpellID)
+            end
+        end
+
+
+        if itemClassID == 4 then
+            --[[
+                TODO:
+                    make class table for these subClassID, ie librams for paladins etc
+            ]]
+
+            --shields
+            if itemSubClassID == 6 then
+                
+            --librams
+            elseif itemSubClassID == 7 then
+                
+            --idols
+            elseif itemSubClassID == 8 then
+                
+            --totems
+            elseif itemSubClassID == 9 then
+                
+            --sigil
+            elseif itemSubClassID == 10 then
+                
+            --relic
+            elseif itemSubClassID == 11 then
+
+            else
                 if itemSubClassID > Equipmate.Constants.ClassIdArmorType[classID] then
                     --print(link, classID, itemSubClassID, Equipmate.Constants.ClassIdArmorType[classID])
                     armorCheck = false
                 end
             end
+        end
 
-            local invSlotID = Equipmate.Constants.GlobalNameToInvSlot[equipLoc]
-            local match;
-            if type(invSlotID) == "table" then
-                for k, v in ipairs(invSlotID) do
-                    if v == invSlot then
-                        match = v;
-                    end
+        local invSlotID = Equipmate.Constants.GlobalNameToInvSlot[equipLoc]
+        local match;
+        if type(invSlotID) == "table" then
+            for k, v in ipairs(invSlotID) do
+                if v == invSlot then
+                    match = v;
                 end
-            else
-                match = invSlotID
             end
+        else
+            match = invSlotID
+        end
 
-            if armorCheck and (invSlot == match) then
+        if weaponCheck and armorCheck and (invSlot == match) then
+
+            --print(string.format("got to the item GUID call using bag %s and slot %s", bag, slot))
+
+            local info = C_Container.GetContainerItemInfo(bag, slot)
+            if info and info.hyperlink then
                 local itemLoc = ItemLocation:CreateFromBagAndSlot(bag, slot)
                 if itemLoc then
                     local guid = C_Item.GetItemGUID(itemLoc)
-                    return {
+                    return true, {
                         link = link,
                         guid = guid,
                         invSlotID = match,
@@ -90,12 +141,26 @@ function Equipmate.Api.GetItemsForInvSlot(invSlot, includeBank)
         end
     end
 
+    return false, {}
+end
+
+
+---Scan the player containers for items that fit the specified inventory slot
+---@param invSlot number the inventory slot ID
+---@param includeBank boolean indicates if bank containers should be scanned
+---@return table items an ipairs table of items
+function Equipmate.Api.GetItemsForInvSlot(invSlot, includeBank)
+
+    local items = {}
+
+    local _, _, classID = UnitClass("player")
+
     for bag = 0, 4 do
         for slot = 1, C_Container.GetContainerNumSlots(bag) do
             local info = C_Container.GetContainerItemInfo(bag, slot)
             if info and info.hyperlink then
-                local item = checkItemInfo(info.hyperlink, bag, slot)
-                if type(item) == "table" then
+                local match, item = Equipmate.Api.TestItemForClassAndSlot(classID, invSlot, info.hyperlink, bag, slot)
+                if match then
                     table.insert(items, item)
                 end
             end

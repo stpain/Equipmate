@@ -268,19 +268,6 @@ function EquipmateMixin:CreateSlashCommands()
     end
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 function EquipmateMixin:Character_OnNewOutfit(outfit)
     self.selectedOutfit = outfit;
     self.deleteOutfit:SetEnabled(true)
@@ -434,7 +421,7 @@ function EquipmateMixin:Character_ApplySelectedOutfit(name)
 
         else
 
-            print(string.format("slot %s is ignored, removing %s", v.slot, tostring(v.link)))
+            --print(string.format("slot %s is ignored, removing %s", v.slot, tostring(v.link)))
 
             --the premapped empty slots should remain as anything swapped before would go into the slot created by the new item beign equipped
             --this will attempt to remove an item and place into an empty slot
@@ -442,7 +429,7 @@ function EquipmateMixin:Character_ApplySelectedOutfit(name)
             if #bagsWithEmptySlots > 0 then
                 local bag = bagsWithEmptySlots[#bagsWithEmptySlots]
 
-                print(string.format("attempting to put item in bag %s", bag))
+                --print(string.format("attempting to put item in bag %s", bag))
 
                 if bag == 0 then
                     PickupInventoryItem(GetInventorySlotInfo(v.slot))
@@ -468,57 +455,33 @@ end
 
 function EquipmateMixin:Character_LoadOutfitItems(items)
 
-    local function createEquipmentItemEntry(item, bag, slot)
-        local t = {}
-        local info = C_Container.GetContainerItemInfo(bag, slot)
-        if info then
-            local _, _, _, equipLoc, icon, classID, subClassID = GetItemInfoInstant(info.hyperlink)
-            if classID == 2 or classID == 4 then
-
-                local invSlotID = Equipmate.Constants.GlobalNameToInvSlot[equipLoc]
-                local match;
-                if type(invSlotID) == "table" then
-                    for k, v in ipairs(invSlotID) do
-                        if v == item.slotID then
-                            match = v;
-                        end
-                    end
-                else
-                    match = invSlotID
-                end
-                if item.slotID == match then
-
-                    local itemLoc = ItemLocation:CreateFromBagAndSlot(bag, slot)
-                    if itemLoc then
-
-                        -- DevTools_Dump({
-                        --     equipLocation = equipLoc,
-                        --     invSlotID = invSlotID,
-                        -- })
-                        -- print("===========================")
-
-                        local itemGUID = C_Item.GetItemGUID(itemLoc)
-                        t = {
-                            text = info.hyperlink,
-                            notCheckable = true,
-                            func = function()
-                                item.link = info.hyperlink
-                                item.guid = itemGUID
-                                Equipmate.CallbackRegistry:TriggerEvent("Database_OnOutfitChanged", self.selectedOutfit)
-                            end,
-                            arg1 = "equipmate-dropdown-tooltip-hook",
-                            arg2 = info.hyperlink,
-                            tooltipOnButton = true,
-                            tooltipTitle = addonName,
-                        }
-
-                    end
-                end
-
-            end
-        end
-        return t;
-    end
+    -- local _, _, classID = UnitClass("player")
+    -- local itemsAdded = {}
+    -- local function createEquipmentItemEntry(item, bag, slot)
+    --     local match, _ = Equipmate.Api.TestItemForClassAndSlot(classID, item.slotID, item.link, bag, slot)
+    --     if match then
+    --         local itemLoc = ItemLocation:CreateFromBagAndSlot(bag, slot)
+    --         if itemLoc then
+    --             local itemGUID = C_Item.GetItemGUID(itemLoc)
+    --             if not itemsAdded[itemGUID] then
+    --                 itemsAdded[itemGUID] = true
+    --                 return {
+    --                     text = item.link,
+    --                     notCheckable = true,
+    --                     func = function()
+    --                         item.link = item.link
+    --                         item.guid = itemGUID
+    --                         Equipmate.CallbackRegistry:TriggerEvent("Database_OnOutfitChanged", self.selectedOutfit)
+    --                     end,
+    --                     arg1 = "equipmate-dropdown-tooltip-hook",
+    --                     arg2 = item.link,
+    --                     tooltipOnButton = true,
+    --                     tooltipTitle = addonName,
+    --                 }
+    --             end
+    --         end
+    --     end
+    -- end
 
     local t = {}
     for k, item in ipairs(items) do
@@ -533,79 +496,85 @@ function EquipmateMixin:Character_LoadOutfitItems(items)
                     GameTooltip:Show()
                 end
             end,
-            onMouseDown = function(f, b)
-                if b == "RightButton" and self.selectedOutfit then
-                    local menu = {
-                        {
-                            text = string.format("Choose item - |cffffffff%s", _G[item.slot]),
-                            isTitle = true,
-                            notCheckable = true,
-                        },
-                        {
-                            text = IGNORE,
-                            notCheckable = true,
-                            func = function()
-                                item.link = false
-                                item.guid = false
-                                Equipmate.CallbackRegistry:TriggerEvent("Database_OnOutfitChanged", self.selectedOutfit)
-                            end,
-                        },
-                    }
+            -- onMouseDown = function(f, b)
+            --     if b == "RightButton" and self.selectedOutfit then
+            --         local menu = {
+            --             {
+            --                 text = string.format("Choose item - |cffffffff%s", _G[item.slot]),
+            --                 isTitle = true,
+            --                 notCheckable = true,
+            --             },
+            --             {
+            --                 text = IGNORE,
+            --                 notCheckable = true,
+            --                 func = function()
+            --                     item.link = false
+            --                     item.guid = false
+            --                     Equipmate.CallbackRegistry:TriggerEvent("Database_OnOutfitChanged", self.selectedOutfit)
+            --                 end,
+            --             },
+            --         }
 
-                    local equippedItems = Equipmate.Api.GetPlayerEquipment()
-                    for k, v1 in ipairs(equippedItems) do
-                        if (item.slot == v1.slot) and (v1.link ~= false) then
-                            table.insert(menu, {
-                                text = string.format("Current: %s", v1.link),
-                                notCheckable = true,
-                                func = function()
-                                    item.link = v1.link
-                                    item.guid = v1.guid
-                                    Equipmate.CallbackRegistry:TriggerEvent("Database_OnOutfitChanged", self.selectedOutfit)
-                                end,
-                            })
-                        end
-                    end
+            --         local equippedItems = Equipmate.Api.GetPlayerEquipment()
+            --         for k, v1 in ipairs(equippedItems) do
+            --             if (item.slot == v1.slot) and (v1.link ~= false) then
+            --                 table.insert(menu, {
+            --                     text = string.format("Current: %s", v1.link),
+            --                     notCheckable = true,
+            --                     func = function()
+            --                         item.link = v1.link
+            --                         item.guid = v1.guid
+            --                         Equipmate.CallbackRegistry:TriggerEvent("Database_OnOutfitChanged", self.selectedOutfit)
+            --                     end,
+            --                 })
+            --             end
+            --         end
 
-                    table.insert(menu, Equipmate.ContextMenuSeparator)
+            --         table.insert(menu, Equipmate.ContextMenuSeparator)
 
-                    for bag = 0, 4 do
-                        for slot = 1, C_Container.GetContainerNumSlots(bag) do
-                            local itemEntry = createEquipmentItemEntry(item, bag, slot)
-                            table.insert(menu, itemEntry)
-                        end
-                    end
+            --         for bag = 0, 4 do
+            --             for slot = 1, C_Container.GetContainerNumSlots(bag) do
+            --                 local itemEntry = createEquipmentItemEntry(item, bag, slot)
+            --                 if type(itemEntry) == "table" then
+            --                     table.insert(menu, itemEntry)
+            --                 end
+            --             end
+            --         end
 
-                    if BankFrame:IsVisible() then
-                        table.insert(menu, Equipmate.ContextMenuSeparator)
-                        table.insert(menu, {
-                            text = "Items in Bank",
-                            isTitle = true,
-                            notCheckable = true,
-                        })
+            --         if BankFrame:IsVisible() then
+            --             table.insert(menu, Equipmate.ContextMenuSeparator)
+            --             table.insert(menu, {
+            --                 text = "Items in Bank",
+            --                 isTitle = true,
+            --                 notCheckable = true,
+            --             })
 
-                        for slot = 1, C_Container.GetContainerNumSlots(-1) do
-                            local itemEntry = createEquipmentItemEntry(item, -1, slot)
-                            table.insert(menu, itemEntry)
-                        end
-                        for bag = 5, 11 do
-                            for slot = 1, C_Container.GetContainerNumSlots(bag) do
-                                local itemEntry = createEquipmentItemEntry(item, bag, slot)
-                                table.insert(menu, itemEntry)
-                            end
-                        end
-                    else
-                        table.insert(menu, Equipmate.ContextMenuSeparator)
-                        table.insert(menu, {
-                            text = "Bank items not available.",
-                            isTitle = true,
-                            notCheckable = true,
-                        })
-                    end
+            --             for slot = 1, C_Container.GetContainerNumSlots(-1) do
+            --                 local itemEntry = createEquipmentItemEntry(item, -1, slot)
+            --                 if type(itemEntry) == "table" then
+            --                     table.insert(menu, itemEntry)
+            --                 end
+            --             end
+            --             for bag = 5, 11 do
+            --                 for slot = 1, C_Container.GetContainerNumSlots(bag) do
+            --                     local itemEntry = createEquipmentItemEntry(item, bag, slot)
+            --                     if type(itemEntry) == "table" then
+            --                         table.insert(menu, itemEntry)
+            --                     end
+            --                 end
+            --             end
+            --         else
+            --             table.insert(menu, Equipmate.ContextMenuSeparator)
+            --             table.insert(menu, {
+            --                 text = "Bank items not available.",
+            --                 isTitle = true,
+            --                 notCheckable = true,
+            --             })
+            --         end
 
-                    EasyMenu(menu, Equipmate.ContextMenu, "cursor", 0, 0, "MENU", 1.25)
-                end
-            end,
+            --         EasyMenu(menu, Equipmate.ContextMenu, "cursor", 0, 0, "MENU", 1.25)
+            --     end
+            -- end,
         })
     end
     self.equipmentListview.scrollView:SetDataProvider(CreateDataProvider(t))
@@ -652,17 +621,17 @@ function EquipmentFlyoutFrameMixin:OnLoad()
     self.buttons = {}
     self.slotID = false
 
-    local ignoreSlotButton = CreateFrame("BUTTON", string.format("%sEquipmentFlyoutButton%s", addonName, "1"), self.buttonFrame, "EquipmentFlyoutButtonTemplate")
-    ignoreSlotButton:SetNormalTexture(255352)
-    ignoreSlotButton:SetSize(40,40)
-    ignoreSlotButton:SetTooltip(L.FLYOUT_IGNORE_SLOT)
-    self.buttons[1] = ignoreSlotButton;
+    -- local ignoreSlotButton = CreateFrame("BUTTON", string.format("%sEquipmentFlyoutButton%s", addonName, "1"), self.buttonFrame, "EquipmentFlyoutButtonTemplate")
+    -- ignoreSlotButton:SetNormalTexture(255352)
+    -- ignoreSlotButton:SetSize(40,40)
+    -- ignoreSlotButton:SetTooltip(L.FLYOUT_IGNORE_SLOT)
+    -- self.buttons[1] = ignoreSlotButton;
 
-    local putInBagButton = CreateFrame("BUTTON", string.format("%sEquipmentFlyoutButton%s", addonName, "2"), self.buttonFrame, "EquipmentFlyoutButtonTemplate")
+    local putInBagButton = CreateFrame("BUTTON", string.format("%sEquipmentFlyoutButton%s", addonName, "1"), self.buttonFrame, "EquipmentFlyoutButtonTemplate")
     putInBagButton:SetNormalTexture(255351)
     putInBagButton:SetSize(40,40)
     putInBagButton:SetTooltip(L.FLYOUT_PUT_IN_BAG)
-    self.buttons[2] = putInBagButton;
+    self.buttons[1] = putInBagButton;
 
     NineSliceUtil.ApplyLayout(self.buttonFrame, Equipmate.Constants.FlyoutButtonsFrameLayout)
 
@@ -696,9 +665,9 @@ function EquipmentFlyoutFrameMixin:Update()
         v:Hide()
     end
     self.buttons[1]:Show()
-    self.buttons[2]:Show()
+    --self.buttons[2]:Show()
 
-    self.buttons[2]:SetScript("OnClick", function()
+    self.buttons[1]:SetScript("OnClick", function()
         for bag = 0, 4 do
             local freeSlots = C_Container.GetContainerFreeSlots(bag)
             if #freeSlots > 0 then
@@ -707,13 +676,13 @@ function EquipmentFlyoutFrameMixin:Update()
             end
         end
     end)
-    self.buttons[1]:SetScript("OnClick", function()
+    --self.buttons[1]:SetScript("OnClick", function()
         --code this to ignore this slot on equipment sets
-    end)
+    --end)
 
     if #self.items > 0 then
         for k, item in ipairs(self.items) do
-            local buttonIndex = k+2
+            local buttonIndex = k+1
             if not self.buttons[buttonIndex] then
                 local button = CreateFrame("BUTTON", string.format("%sEquipmentFlyoutButton%s", addonName, buttonIndex), self.buttonFrame, "EquipmentFlyoutButtonTemplate")
                 button:SetSize(40,40)
@@ -752,7 +721,7 @@ function EquipmentFlyoutFrameMixin:Update()
             button:SetPoint("LEFT", (i * 40) + 5, rowOffset)
             i = i + 1;
         end
-        self.buttonFrame:SetSize(10 + ((#self.items+2)*40), 50)
+        self.buttonFrame:SetSize(10 + ((#self.items+1)*40), 50)
         self.buttonFrame:ClearAllPoints()
         self.buttonFrame:SetPoint("LEFT", self, "RIGHT", 6, 0)
     end
@@ -762,7 +731,7 @@ function EquipmentFlyoutFrameMixin:Update()
         button:ClearAllPoints()
         button:SetPoint("LEFT", ((k-1) * 40) + 5, 0)
     end
-    self.buttonFrame:SetSize(10 + ((#self.items+2)*40), 50)
+    self.buttonFrame:SetSize(10 + ((#self.items+1)*40), 50)
 
 end
 

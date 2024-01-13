@@ -47,6 +47,8 @@
         "PanelTemplates_SetTab",
         "BOOKTYPE_SPELL",
         "ITEM_QUALITY_COLORS",
-        "CharacterHandsSlot"
+        "CharacterHandsSlot",
+        "INVTYPE_EQUIPABLESPELL_WEAPON",
+        "WEAPON"
     ]
 }
