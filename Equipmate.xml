@@ -10,6 +10,7 @@
 
     <Frame name="EquipmentFlyoutFrame" mixin="EquipmentFlyoutFrameMixin" hidden="true" enableMouse="false" frameLevel="9998" frameStrata="TOOLTIP">
 		<Size x="43" y="43"/>
+        <!-- <HitRectInsets left="-1" right="-10" top="-2" bottom="-2"/> -->
 		<Layers>
 			<Layer level="OVERLAY">
 				<Texture parentKey="Highlight" name="$parentHighlight" file="Interface\PaperDollInfoFrame\UI-GearManager-ItemButton-Highlight">
@@ -28,11 +29,15 @@
 				<Anchors>
 					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT"/>
 				</Anchors>
+                <!-- <HitRectInsets left="-0" right="-10" top="0" bottom="-10"/> -->
 			</Frame>
 		</Frames>
 		<Scripts>
             <OnLoad method="OnLoad"/>
             <OnShow method="OnShow"/>
+            <OnHide method="OnHide"/>
+            <OnKeyDown method="OnKeyDown"/>
+            <OnKeyUp method="OnKeyUp"/>
 		</Scripts>
 	</Frame>
 
@@ -43,6 +48,21 @@
         <Anchors>
             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="0" y="-11"/>
         </Anchors>
+
+        <Layers>
+            <Layer level="OVERLAY">
+                <FontString parentKey="outfitInfoLeft" inherits="GameFontWhite">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="$parentInset" x="2" y="-2"/>
+                    </Anchors>
+                </FontString>
+                <FontString parentKey="outfitInfoRight" inherits="GameFontWhite">
+                    <Anchors>
+                        <Anchor point="TOPRIGHT" relativeTo="$parentInset" x="-2" y="-2"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
 
         <Frames>
 
@@ -66,11 +86,15 @@
                 <Size x="300" y="230"/>
             </Frame>
 
-            <Button parentKey="selectOutfitDropdown" inherits="TBDDropDownTemplate"  text="New Outfit">
+            <Button parentKey="selectOutfitDropdown" inherits="TBDDropDownTemplate,TBDBaseTooltipButton" text="New Outfit">
                 <Size x="140" y="34"/>
                 <Anchors>
                     <Anchor point="TOP" x="-20" y="-26"/>
                 </Anchors>
+                <KeyValues>
+                    <KeyValue key="tooltipTitle" value="EQUIPMATE_UI_OUTFIT_SELECT_DROPDOWN_TOOLTIP_TITLE" type="global"/>
+                    <KeyValue key="tooltipText" value="EQUIPMATE_UI_OUTFIT_SELECT_DROPDOWN_TOOLTIP_TEXT" type="global"/>
+                </KeyValues>
             </Button>
 
             <Button parentKey="outfitConfig" inherits="TBDSquareSlotButton">
@@ -87,14 +111,15 @@
                     <Anchor point="RIGHT" relativeKey="$parent.outfitConfig" relativePoint="LEFT" x="-4" y="0"/>
                 </Anchors>
                 <KeyValues>
-                    <KeyValue key="tooltipText" value="EQUIPMATE_TT_UI_RESCAN_BUTTON" type="global"/>
+                    <KeyValue key="tooltipTitle" value="EQUIPMATE_UI_RESCAN_BUTTON_TOOLTIP_TITLE" type="global"/>
+                    <KeyValue key="tooltipText" value="EQUIPMATE_UI_RESCAN_BUTTON_TOOLTIP_TEXT" type="global"/>
                 </KeyValues>
             </Button>
 
 
             <Frame parentKey="equipmentListview" inherits="TBDListviewTemplate">
                 <Anchors>
-                    <Anchor point="TOPLEFT" relativeTo="$parentInset" x="0" y="-2"/>
+                    <Anchor point="TOPLEFT" relativeTo="$parentInset" x="0" y="-20"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$parentInset" x="-2" y="2"/>
                 </Anchors>
                 <KeyValues>

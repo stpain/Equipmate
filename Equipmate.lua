@@ -90,12 +90,34 @@ local function CreatePaperDollButtons()
         end
     end)
 
+    local function toggleFlyout(flyoutOpenButton, slotButton, slotID, isVerticle)
+
+        for k, v in ipairs(Equipmate.Constants.PaperDollInventorySlotToggleButtons) do
+            Equipmate.Api.EquipmentFlyoutPopoutButton_SetReversed(v, false)
+        end
+
+        local flyout = EquipmentFlyoutFrame
+        flyout:Hide()
+
+        flyout:SetSlot(slotID)
+        flyout:IsVerticle(isVerticle)
+        flyout:SetParent(slotButton)
+        flyout:SetFrameStrata("TOOLTIP")
+        flyout:SetFrameLevel(9996)
+        flyout:ClearAllPoints()
+        flyout:SetPoint("TOPLEFT", -2, 4)
+        flyout:Show()
+
+        Equipmate.Api.EquipmentFlyoutPopoutButton_SetReversed(flyoutOpenButton, true)
+    end
+
     for slotName, info in pairs(Equipmate.Constants.PaperDollSlotNames) do
 
         local slot = _G[slotName]
 
         --this key value is used set the texcoords
-        slot.verticalFlyout = (info.allignment == "bottom") and true or false;
+        local isVerticle = (info.allignment == "bottom") and true or false
+        slot.verticalFlyout = isVerticle;
 
         local button = CreateFrame("BUTTON", string.format("%s%sFlyoutButton", addonName, slotName), slot, "TBDSlotFlyoutButton")
         if info.allignment == "right" then
@@ -118,27 +140,8 @@ local function CreatePaperDollButtons()
         button:SetScript("OnLeave", function(slotButton)
             --slotButton:Click()
         end)
-        button:SetScript("OnEnter", function(slotButton)
-            --slotButton:Click()
-        end)
-        button:SetScript("OnClick", function(slotButton)
-        
-            local flyout = EquipmentFlyoutFrame
-
-            flyout:SetSlot(info.slotID)
-            flyout:IsVerticle((info.allignment == "bottom") and true or false)
-            flyout:SetParent(slot)
-            flyout:SetFrameStrata("TOOLTIP")
-            flyout:SetFrameLevel(9996)
-            flyout:ClearAllPoints()
-            flyout:SetPoint("TOPLEFT", -2, 4)
-            flyout:SetShown(not flyout:IsVisible())
-
-            if flyout:IsVisible() then
-                Equipmate.Api.EquipmentFlyoutPopoutButton_SetReversed(button, true)
-            else
-                Equipmate.Api.EquipmentFlyoutPopoutButton_SetReversed(button, false)
-            end
+        button:SetScript("OnEnter", function()
+            toggleFlyout(button, slot, info.slotID, isVerticle)
         end)
     end
 end
@@ -176,7 +179,7 @@ function EquipmateMixin:OnLoad()
 
     self.rescanOutfit.icon:SetAtlas("transmog-icon-revert")
     self.rescanOutfit:SetScript("OnClick", function()
-        self:Character_RescanEquipment(true)
+        self:RescanEquipment(true)
     end)
 
 
@@ -185,8 +188,8 @@ function EquipmateMixin:OnLoad()
     end
 
     Equipmate.CallbackRegistry:RegisterCallback("Database_OnInitialised", self.Database_OnInitialised, self)
-    Equipmate.CallbackRegistry:RegisterCallback("Database_OnNewOutfit", self.Character_OnNewOutfit, self)
-    Equipmate.CallbackRegistry:RegisterCallback("Database_OnOutfitChanged", self.Character_OnOutfitChanged, self)
+    Equipmate.CallbackRegistry:RegisterCallback("Database_OnNewOutfit", self.OnNewOutfit, self)
+    Equipmate.CallbackRegistry:RegisterCallback("Database_OnOutfitChanged", self.OnOutfitChanged, self)
     Equipmate.CallbackRegistry:RegisterCallback("Database_OnOutfitDeleted", self.Database_OnOutfitDeleted, self)
 
 
@@ -197,11 +200,11 @@ function EquipmateMixin:OnLoad()
     end)
     self.equipOutfit:SetEnabled(false)
     self.equipOutfit:SetScript("OnClick", function()
-        self:Character_ApplySelectedOutfit()
+        self:ApplySelectedOutfit()
     end)
     self.deleteOutfit:SetEnabled(false)
     self.deleteOutfit:SetScript("OnClick", function()
-        self:Character_DeleteOutfit()
+        self:DeleteOutfit()
     end)
     self.newOutfit:SetScript("OnClick", function()
         StaticPopup_Show("NewOutfit")
@@ -228,7 +231,7 @@ function EquipmateMixin:OnShow()
 end
 
 function EquipmateMixin:Database_OnInitialised()
-    self:Character_CreateOutfitDropdownMenu()
+    self:CreateOutfitDropdownMenu()
 
     CreatePaperDollButtons()
 end
@@ -263,71 +266,70 @@ function EquipmateMixin:CreateSlashCommands()
             self:Show()
 
         elseif (arg1 == "equip") and (type(arg2) == "string") then
-            self:Character_ApplySelectedOutfit(arg2)
+            self:ApplySelectedOutfit(arg2)
         end
     end
 end
 
-function EquipmateMixin:Character_OnNewOutfit(outfit)
+function EquipmateMixin:OnNewOutfit(outfit)
     self.selectedOutfit = outfit;
     self.deleteOutfit:SetEnabled(true)
     self.equipOutfit:SetEnabled(true)
-    self:Character_CreateOutfitDropdownMenu()
+    self:CreateOutfitDropdownMenu()
     self.selectOutfitDropdown:SetText(outfit.name)
 
     local currentEquipment = Equipmate.Api.GetPlayerEquipment()
     outfit.items = currentEquipment;
 
-    self:Character_LoadOutfitItems(outfit.items)
+    self:LoadOutfitItems(outfit.items)
 end
 
-function EquipmateMixin:Character_RescanEquipment(updateSelectedOutfit)
+function EquipmateMixin:RescanEquipment(updateSelectedOutfit)
     
     if updateSelectedOutfit and self.selectedOutfit then
         local currentEquipment = Equipmate.Api.GetPlayerEquipment()
-        self:Character_UpdateOutfitItems(nil, currentEquipment)
+        self:UpdateOutfitItems(nil, currentEquipment)
     end
 end
 
-function EquipmateMixin:Character_UpdateOutfitItems(outfit, items)
+function EquipmateMixin:UpdateOutfitItems(outfit, items)
     
     if not outfit then
         if self.selectedOutfit and self.selectedOutfit.name then
             self.selectedOutfit.items = items;
-            self:Character_LoadOutfitItems(self.selectedOutfit.items)
+            self:LoadOutfitItems(self.selectedOutfit.items)
             print(string.format("[%s] updated outfit items for - %s", addonName, self.selectedOutfit.name))
         end
     end
 end
 
-function EquipmateMixin:Character_OnOutfitSelected(outfit)
+function EquipmateMixin:OnOutfitSelected(outfit)
     self.selectedOutfit = outfit;
     self.deleteOutfit:SetEnabled(true)
     self.equipOutfit:SetEnabled(true)
-    self:Character_LoadOutfitItems(outfit.items)
+    self:LoadOutfitItems(outfit.items)
 end
 
-function EquipmateMixin:Character_OnOutfitChanged(outfit)
-    self:Character_LoadOutfitItems(outfit.items)
+function EquipmateMixin:OnOutfitChanged(outfit)
+    self:LoadOutfitItems(outfit.items)
 end
 
 function EquipmateMixin:Database_OnOutfitDeleted()
-    self:Character_LoadOutfitItems({})
+    self:LoadOutfitItems({})
     self.selectOutfitDropdown:SetText("")
     self.selectedOutfit = nil
     self.deleteOutfit:SetEnabled(false)
     self.equipOutfit:SetEnabled(false)
-    self:Character_CreateOutfitDropdownMenu()
+    self:CreateOutfitDropdownMenu()
 end
 
-function EquipmateMixin:Character_DeleteOutfit()
+function EquipmateMixin:DeleteOutfit()
     if self.selectedOutfit then
         Database:DeleteOutfit(self.selectedOutfit.name)
     end
 end
 
-function EquipmateMixin:Character_ApplySelectedOutfit(name)
-
+function EquipmateMixin:ApplySelectedOutfit(name)
 
     --this is for macro use
     --look for an outfit with matching name
@@ -337,7 +339,7 @@ function EquipmateMixin:Character_ApplySelectedOutfit(name)
         local outfits = Database:GetOutfits()
         for k, v in ipairs(outfits) do
             if v.name == name and v.character == addon.thisCharacter then
-                self:Character_OnOutfitSelected(v)
+                self:OnOutfitSelected(v)
                 foundOutift = true
             end
         end
@@ -453,7 +455,11 @@ function EquipmateMixin:Character_ApplySelectedOutfit(name)
 
 end
 
-function EquipmateMixin:Character_LoadOutfitItems(items)
+function EquipmateMixin:LoadOutfitItems(items)
+
+    local outfitItemInfo = Equipmate.Api.GetItemSetInfo(items)
+    self.outfitInfoLeft:SetText(string.format("%d items", outfitItemInfo.numItems))
+    self.outfitInfoRight:SetText(string.format("Ilvl %s", outfitItemInfo.averageItemLevel))
 
     -- local _, _, classID = UnitClass("player")
     -- local itemsAdded = {}
@@ -581,7 +587,7 @@ function EquipmateMixin:Character_LoadOutfitItems(items)
 
 end
 
-function EquipmateMixin:Character_CreateOutfitDropdownMenu()
+function EquipmateMixin:CreateOutfitDropdownMenu()
     -- local outfitMenu = {
     --     {
     --         text = "New Outfit",
@@ -599,7 +605,7 @@ function EquipmateMixin:Character_CreateOutfitDropdownMenu()
             table.insert(outfitMenu, {
                 text = outfit.name,
                 func = function()
-                    self:Character_OnOutfitSelected(outfit)
+                    self:OnOutfitSelected(outfit)
                 end,
             })
         end
@@ -650,7 +656,48 @@ end
 function EquipmentFlyoutFrameMixin:ClearItems()
     wipe(self.items)
 end
+function EquipmentFlyoutFrameMixin:OnHide()
+    for k, v in ipairs(Equipmate.Constants.PaperDollInventorySlotToggleButtons) do
+        Equipmate.Api.EquipmentFlyoutPopoutButton_SetReversed(v, false)
+    end
+    self:SetScript("OnUpdate", nil)
+    if self.fadeTimer then
+        self.fadeTimer:Cancel()
+    end
+end
 function EquipmentFlyoutFrameMixin:OnShow()
+    self:Update()
+
+    self.fadeTimer = C_Timer.NewTimer(1.75, function()
+        self:SetScript("OnUpdate", function()
+            if self.buttonFrame:IsVisible() then
+                local isOver = false
+                if self:IsMouseOver() then
+                    isOver = true
+                end
+                if self.buttonFrame:IsMouseOver() then
+                    isOver = true
+                end
+                for k, v in ipairs(self.buttons) do
+                    if v:IsMouseOver() then
+                        isOver = true
+                    end
+                end
+                if self:GetParent():IsMouseOver() then
+                    isOver = true
+                end
+                if not isOver then
+                    self:Hide()
+                end
+            end
+        end)
+    end)
+
+end
+function EquipmentFlyoutFrameMixin:OnKeyUp(key)
+    self:Update()
+end
+function EquipmentFlyoutFrameMixin:OnKeyDown(key)
     self:Update()
 end
 function EquipmentFlyoutFrameMixin:Update()
@@ -698,25 +745,19 @@ function EquipmentFlyoutFrameMixin:Update()
     if self.isVerticle then
         local i = 0;
         for k, button in ipairs(self.buttons) do
-            if i > 3 then
-                columOffset = columOffset + 40;
-                i = 0;
-            end
             button:ClearAllPoints()
-            button:SetPoint("TOP", columOffset, (i * -40) - 5)
+            button:SetPoint("TOP", 0, (i * -40) - 5)
             i = i + 1;
         end
-        self.buttonFrame:SetSize(50, 10 + ((#self.items+2)*40))
+        self.buttonFrame:SetSize(50, 10 + ((#self.items+1)*40))
         self.buttonFrame:ClearAllPoints()
         self.buttonFrame:SetPoint("TOPLEFT", self, "BOTTOMLEFT", 0, -6)
+
+        --self:SetHitRectInsets(-1, -1, -1, -6)
 
     else
         local i = 0;
         for k, button in ipairs(self.buttons) do
-            if i > 3 then
-                rowOffset = rowOffset - 40;
-                i = 0;
-            end
             button:ClearAllPoints()
             button:SetPoint("LEFT", (i * 40) + 5, rowOffset)
             i = i + 1;
@@ -724,14 +765,16 @@ function EquipmentFlyoutFrameMixin:Update()
         self.buttonFrame:SetSize(10 + ((#self.items+1)*40), 50)
         self.buttonFrame:ClearAllPoints()
         self.buttonFrame:SetPoint("LEFT", self, "RIGHT", 6, 0)
+
+        --self:SetHitRectInsets(-1, -6, -1, -1)
     end
 
     --is this mayeb a better layout?
-    for k, button in ipairs(self.buttons) do
-        button:ClearAllPoints()
-        button:SetPoint("LEFT", ((k-1) * 40) + 5, 0)
-    end
-    self.buttonFrame:SetSize(10 + ((#self.items+1)*40), 50)
+    -- for k, button in ipairs(self.buttons) do
+    --     button:ClearAllPoints()
+    --     button:SetPoint("LEFT", ((k-1) * 40) + 5, 0)
+    -- end
+    --self.buttonFrame:SetSize(10 + ((#self.items+1)*40), 50)
 
 end
 

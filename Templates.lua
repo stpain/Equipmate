@@ -181,12 +181,35 @@ end
 
 TBDSquareSlotButtonMixin = {}
 function TBDSquareSlotButtonMixin:OnLoad()
-    if self.tooltipText then
-        self:SetScript("OnEnter", function()
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            GameTooltip:AddLine(self.tooltipText)
-            GameTooltip:Show()
-        end)
+    -- if self.tooltipTitle and self.tooltipText then
+    --     self:SetScript("OnEnter", function()
+    --         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    --         GameTooltip:AddLine(self.tooltipTitle)
+    --         GameTooltip:AddLine(self.tooltipText, 1, 1, 1, true)
+    --         GameTooltip:Show()
+    --     end)
+    -- elseif self.tooltipText then
+    --     self:SetScript("OnEnter", function()
+    --         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    --         GameTooltip:SetText(self.tooltipText, 1, 1, 1, 1, true)
+    --         GameTooltip:Show()
+    --     end)
+    -- end
+end
+
+
+
+TBDBaseTooltipMixin = {}
+function TBDBaseTooltipMixin:OnEnter()
+    if self.tooltipTitle and self.tooltipText then
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:AddLine(self.tooltipTitle)
+        GameTooltip:AddLine(self.tooltipText, 1, 1, 1, true)
+        GameTooltip:Show()
+    elseif self.tooltipText then
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(self.tooltipText, 1, 1, 1, 1, true)
+        GameTooltip:Show()
     end
 end
 

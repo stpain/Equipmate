@@ -1,6 +1,23 @@
 <Ui>
 
-    <Button name="TBDSquareSlotButton" mixin="TBDSquareSlotButtonMixin" virtual="true">
+    <Frame name="TBDBaseTooltipFrame" mixin="TBDBaseTooltipMixin" virtual="true">
+        <Scripts>
+            <OnEnter method="OnEnter"/>
+            <OnLeave>
+                GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+            </OnLeave>
+        </Scripts>
+    </Frame>
+    <Button name="TBDBaseTooltipButton" mixin="TBDBaseTooltipMixin" virtual="true">
+        <Scripts>
+            <OnEnter method="OnEnter"/>
+            <OnLeave>
+                GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+            </OnLeave>
+        </Scripts>
+    </Button>
+
+    <Button name="TBDSquareSlotButton" inherits="TBDBaseTooltipButton" virtual="true">
 		<Size x="34" y="34"/>
         <NormalTexture atlas="WoWShare-AddButton-Up"/>
         <PushedTexture atlas="WoWShare-AddButton-Down"/>
@@ -15,12 +32,6 @@
 				</Texture>
 			</Layer>
 		</Layers>
-        <Scripts>
-            <OnLoad method="OnLoad"/>
-			<OnLeave>
-				GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-			</OnLeave>
-		</Scripts>
     </Button>
 
     <Button name="TBDSlotFlyoutButton" virtual="true">

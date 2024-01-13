@@ -49,6 +49,7 @@
         "ITEM_QUALITY_COLORS",
         "CharacterHandsSlot",
         "INVTYPE_EQUIPABLESPELL_WEAPON",
-        "WEAPON"
+        "WEAPON",
+        "GameTooltip_SetTitle"
     ]
 }
