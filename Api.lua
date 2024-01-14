@@ -52,10 +52,13 @@ function Equipmate.Api.GetItemSetInfo(items)
                         bag = bag,
                         slot = slot,
                     }
+                    --print("added", info.hyperlink, guid)
                 end
             end
         end
     end
+
+    --DevTools_Dump(playerBags)
 
     local ret = {
         numItems = 1,
@@ -73,9 +76,9 @@ function Equipmate.Api.GetItemSetInfo(items)
             ret.numItems = ret.numItems + 1
             ret.totalItemLevel = ret.totalItemLevel + effectiveILvl;
         end
-
         if type(v.guid) == "string" then
-            if playerBags[v.guid] then
+            --print(v.link, v.guid)
+            if type(playerBags[v.guid]) == "table" then
                 table.insert(ret.itemsInBags, v)
             end
         end
@@ -83,33 +86,19 @@ function Equipmate.Api.GetItemSetInfo(items)
 
     ret.averageItemLevel = tonumber(string.format("%.2f", (ret.totalItemLevel / ret.numItems)))
 
-    DevTools_Dump(ret)
+    --DevTools_Dump(ret)
 
     return ret;
 end
 
 
----Scan the players current skills to determine which equipment items can be used
----@return table skills an ipairs table of skills
-function Equipmate.Api.ScanSkills()
-    local skills = {}
-    for i = 1, GetNumSkillLines() do
-        local name, _type, _, _, _ = GetSkillLineInfo(i)
-
-        print(name, _type)
-    end
-    return skills;
-end
-
-
 ---Performs checks on the item provided to see if it fits the inventory slot and class/character skills
----@param classID number classID
 ---@param invSlot number paperedoll inventory slot ID
 ---@param link string item hyperlink
 ---@param bag number bagID
 ---@param slot number slotID (bag)
 ---@return boolean, table
-function Equipmate.Api.TestItemForClassAndSlot(classID, invSlot, link, bag, slot, ignoreSkillCheck)
+function Equipmate.Api.TestItemForClassAndSlot(invSlot, link, bag, slot, ignoreSkillCheck)
 
     --print("checkign item", link)
 
@@ -151,10 +140,7 @@ function Equipmate.Api.TestItemForClassAndSlot(classID, invSlot, link, bag, slot
             elseif itemSubClassID == 11 then
 
             else
-                if itemSubClassID > Equipmate.Constants.ClassIdArmorType[classID] then
-                    --print(link, classID, itemSubClassID, Equipmate.Constants.ClassIdArmorType[classID])
-                    armorCheck = false
-                end
+                armorCheck = IsPlayerSpell(Equipmate.Constants.ItemSubClassIdToArmorSkillSpellId[itemSubClassID])
             end
         end
 
@@ -204,13 +190,11 @@ function Equipmate.Api.GetItemsForInvSlot(invSlot, includeBank)
 
     local items = {}
 
-    local _, _, classID = UnitClass("player")
-
     for bag = 0, 4 do
         for slot = 1, C_Container.GetContainerNumSlots(bag) do
             local info = C_Container.GetContainerItemInfo(bag, slot)
             if info and info.hyperlink then
-                local match, item = Equipmate.Api.TestItemForClassAndSlot(classID, invSlot, info.hyperlink, bag, slot, IsShiftKeyDown())
+                local match, item = Equipmate.Api.TestItemForClassAndSlot(invSlot, info.hyperlink, bag, slot, IsShiftKeyDown())
                 if match then
                     table.insert(items, item)
                 end

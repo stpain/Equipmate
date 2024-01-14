@@ -203,6 +203,13 @@ Equipmate.Constants.ClassIdArmorType = {
     [12] = 2, --dh
 }
 
+Equipmate.Constants.ItemSubClassIdToArmorSkillSpellId = {
+    [Enum.ItemArmorSubclass.Cloth] = 9078,
+    [Enum.ItemArmorSubclass.Leather] = 9077,
+    [Enum.ItemArmorSubclass.Mail] = 8737,
+    [Enum.ItemArmorSubclass.Plate] = 750,
+}
+
 Equipmate.Constants.ItemSubClassIdToWeaponSkillSpellId = {
     [Enum.ItemWeaponSubclass.Polearm] = 200,
     [Enum.ItemWeaponSubclass.Sword1H] = 201,

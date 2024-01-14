@@ -50,6 +50,7 @@
         "CharacterHandsSlot",
         "INVTYPE_EQUIPABLESPELL_WEAPON",
         "WEAPON",
-        "GameTooltip_SetTitle"
+        "GameTooltip_SetTitle",
+        "class"
     ]
 }
