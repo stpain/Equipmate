@@ -140,7 +140,9 @@ function Equipmate.Api.TestItemForClassAndSlot(invSlot, link, bag, slot, ignoreS
             elseif itemSubClassID == 11 then
 
             else
-                armorCheck = IsPlayerSpell(Equipmate.Constants.ItemSubClassIdToArmorSkillSpellId[itemSubClassID])
+                if type(itemSubClassID) == "number" then
+                    armorCheck = IsPlayerSpell(Equipmate.Constants.ItemSubClassIdToArmorSkillSpellId[itemSubClassID])
+                end
             end
         end
 

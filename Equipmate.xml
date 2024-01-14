@@ -36,8 +36,8 @@
             <OnLoad method="OnLoad"/>
             <OnShow method="OnShow"/>
             <OnHide method="OnHide"/>
-            <OnKeyDown method="OnKeyDown"/>
-            <OnKeyUp method="OnKeyUp"/>
+            <!-- <OnKeyDown method="OnKeyDown"/>
+            <OnKeyUp method="OnKeyUp"/> -->
 		</Scripts>
 	</Frame>
 

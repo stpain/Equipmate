@@ -642,8 +642,16 @@ function EquipmentFlyoutFrameMixin:OnLoad()
     NineSliceUtil.ApplyLayout(self.buttonFrame, Equipmate.Constants.FlyoutButtonsFrameLayout)
 
     self:RegisterEvent("BAG_UPDATE_DELAYED")
-    self:SetScript("OnEvent", function()
-        self:Update()
+    self:RegisterEvent("MODIFIER_STATE_CHANGED")
+    self:SetScript("OnEvent", function(_, event, ...)
+        if event == "BAG_UPDATE_DELAYED" then
+            self:Update()
+        end
+        if event == "MODIFIER_STATE_CHANGED" then
+            if IsShiftKeyDown() then
+                self:Update()
+            end
+        end
     end)
 
 end
@@ -692,7 +700,6 @@ function EquipmentFlyoutFrameMixin:OnShow()
             end
         end)
     end)
-
 end
 function EquipmentFlyoutFrameMixin:OnKeyUp(key)
     self:Update()
