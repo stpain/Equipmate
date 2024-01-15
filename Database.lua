@@ -9,6 +9,7 @@ local datebaseDefaults = {
     characters = {},
     containers = {},
     outfits = {},
+    outfitBindings = {}
 }
 
 function Database:Init(forceReset)
@@ -43,8 +44,37 @@ function Database:NewCharacter(nameRealm, classID, raceID)
     end
 end
 
-function Database:GetOutfits()
-    return self.db.outfits or {}
+function Database:SetKeyBindingOutfit(keyBindID, setID)
+    if self.db then
+        self.db.outfitBindings[keyBindID] = setID;
+    end
+end
+
+function Database:GetOutfitFromKeyBindingID(id)
+    if self.db then
+        if self.db.outfitBindings[id] then
+            for k, v in ipairs(self.db.outfits) do
+                if v.id == self.db.outfitBindings[id] then
+                    return v;
+                end
+            end
+        end
+    end
+end
+
+function Database:GetOutfits(nameRealm)
+    if self.db then
+        if not nameRealm then
+            return self.db.outfits or {}
+        else
+            local t = {}
+            for k, v in ipairs(self.db.outfits) do
+                if v.character == nameRealm then
+                    table.insert(t, v)
+                end
+            end
+        end
+    end
 end
 
 function Database:DeleteOutfit(name)
@@ -73,6 +103,7 @@ function Database:NewOutfit(outfit, nameRealm)
             items = {},
             icon = 0,
             config = {},
+            id = time(),
         })
         Equipmate.CallbackRegistry:TriggerEvent("Database_OnNewOutfit", self.db.outfits[#self.db.outfits])
     end

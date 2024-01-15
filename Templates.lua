@@ -231,6 +231,9 @@ end
 function EquipmentFlyoutButtonMixin:SetItem(item)
     if item.icon and item.link then
 
+        local effectiveILvl, isPreview, baseILvl = GetDetailedItemLevelInfo(item.link)
+        self.topLeft:SetText(effectiveILvl)
+
         local itemMixin = Item:CreateFromItemLink(item.link)
         if not itemMixin:IsItemEmpty() then
             itemMixin:ContinueOnItemLoad(function()
@@ -238,7 +241,6 @@ function EquipmentFlyoutButtonMixin:SetItem(item)
                 self.quality:SetAtlas(Equipmate.Constants.ItemQualityAtlas[quality])
             end)
         end
-
 
         self.icon:SetTexture(item.icon)
         self:SetScript("OnEnter", function()
@@ -261,6 +263,8 @@ function EquipmentFlyoutButtonMixin:SetItem(item)
 end
 function EquipmentFlyoutButtonMixin:ClearItem()
     self:SetScript("OnEnter", nil)
+    self:SetScript("OnClick", nil)
     self.icon:SetTexture(nil)
+    self.topLeft:SetText(nil)
 end
 

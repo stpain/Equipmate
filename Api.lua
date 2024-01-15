@@ -2,6 +2,7 @@
 
 local addonName, addon = ...;
 
+local Database = addon.Database;
 
 Equipmate.Api = {}
 
@@ -38,7 +39,37 @@ function Equipmate.Api.GetPlayerEquipment()
 end
 
 
-function Equipmate.Api.GetItemSetInfo(items)
+function Equipmate.Api.GetEquipmentSetsForCharacter(nameRealm)
+
+    local t = {}
+
+    local outfits = Database:GetOutfits(nameRealm)
+
+    if #outfits > 0 then
+        for k, outfit in ipairs(outfits) do
+            local copy = {}
+            for x, y in pairs(outfit) do
+                if type(y) ~= "table" then
+                    copy[x] = y;
+                else
+                    if x == "items" then
+                        local items = {}
+                        for a, b in ipairs(y) do
+                            table.insert(items, b)
+                        end
+                        copy.items = items;
+                    end
+                end
+            end
+            table.insert(t, copy)
+        end
+    end
+
+    return t;
+end
+
+
+function Equipmate.Api.GetInfoForEquipmentSetItems(items)
 
     local playerBags = {}
     for bag = 0, 4 do
@@ -121,8 +152,14 @@ function Equipmate.Api.TestItemForClassAndSlot(invSlot, link, bag, slot, ignoreS
                     make class table for these subClassID, ie librams for paladins etc
             ]]
 
+            -- Spellstones, Firestones, Trinkets, Rings and Necks
+            if itemSubClassID == 0 then
+
+            --cosmetic
+            elseif itemSubClassID == 5 then
+
             --shields
-            if itemSubClassID == 6 then
+            elseif itemSubClassID == 6 then
                 
             --librams
             elseif itemSubClassID == 7 then
@@ -140,7 +177,8 @@ function Equipmate.Api.TestItemForClassAndSlot(invSlot, link, bag, slot, ignoreS
             elseif itemSubClassID == 11 then
 
             else
-                if type(itemSubClassID) == "number" then
+                --it shouldn't go out of these bounds but just check
+                if (itemSubClassID >= 1) and (itemSubClassID <= 4) then
                     armorCheck = IsPlayerSpell(Equipmate.Constants.ItemSubClassIdToArmorSkillSpellId[itemSubClassID])
                 end
             end
@@ -192,6 +230,8 @@ function Equipmate.Api.GetItemsForInvSlot(invSlot, includeBank)
 
     local items = {}
 
+    local link = GetInventoryItemLink('player', invSlot)
+
     for bag = 0, 4 do
         for slot = 1, C_Container.GetContainerNumSlots(bag) do
             local info = C_Container.GetContainerItemInfo(bag, slot)
@@ -199,6 +239,35 @@ function Equipmate.Api.GetItemsForInvSlot(invSlot, includeBank)
                 local match, item = Equipmate.Api.TestItemForClassAndSlot(invSlot, info.hyperlink, bag, slot, IsShiftKeyDown())
                 if match then
                     table.insert(items, item)
+
+                    --Equipmate.Api.CompareItems(link, info.hyperlink)
+                end
+            end
+        end
+    end
+
+    if includeBank then
+
+        --bank
+        for slot = 1, C_Container.GetContainerNumSlots(-1) do
+            local info = C_Container.GetContainerItemInfo(-1, slot)
+            if info and info.hyperlink then
+                local match, item = Equipmate.Api.TestItemForClassAndSlot(invSlot, info.hyperlink, -1, slot, IsShiftKeyDown())
+                if match then
+                    table.insert(items, item)
+                end
+            end
+        end
+        
+        --bank bags
+        for bag = 5, 11 do
+            for slot = 1, C_Container.GetContainerNumSlots(bag) do
+                local info = C_Container.GetContainerItemInfo(bag, slot)
+                if info and info.hyperlink then
+                    local match, item = Equipmate.Api.TestItemForClassAndSlot(invSlot, info.hyperlink, bag, slot, IsShiftKeyDown())
+                    if match then
+                        table.insert(items, item)
+                    end
                 end
             end
         end
@@ -228,11 +297,118 @@ function Equipmate.Api.EquipmentFlyoutPopoutButton_SetReversed(button, isReverse
 end
 
 
+function Equipmate.Api.EquipItemsFromKeyBinding(id)
+    
+    local outfit = Database:GetOutfitFromKeyBindingID(id)
+    if outfit and outfit.items then
+        Equipmate.Api.EquipItemSet(outfit.items, Equipmate.Constants.IsBankOpen)
+    end
+end
 
 
 
+function Equipmate.Api.EquipItemSet(items, isBankOpen)
+    --these need to be checked for container types - ammo/shards etc
+    local bagsWithEmptySlots = {}
+    local emptySlotindex = 1
+    for bag = 4, 0, -1 do
+        local freeSlots = C_Container.GetContainerFreeSlots(bag)
+        if #freeSlots > 0 then
+            for k, v in ipairs(freeSlots) do
+                bagsWithEmptySlots[emptySlotindex] = bag
+                emptySlotindex = emptySlotindex + 1;
+            end
+        end
+    end
 
+    --DevTools_Dump(bagsWithEmptySlots)
 
+    local function equipItem(invSlot, bag, slot)
+        local info = C_Container.GetContainerItemInfo(bag, slot)
+        if info then
+            local itemLoc = ItemLocation:CreateFromBagAndSlot(bag, slot)
+            if itemLoc then
+                local itemGUID = C_Item.GetItemGUID(itemLoc)
+                if invSlot.guid == itemGUID then
+
+                    --this seems to work well with the bank items
+                    --the logic is to pick up the new item and swap with what was in the slot
+                    --in theory this means that items being removed will have an empty slot waiting
+                    --however ignored slots create a potential issue as they require bag/bank space to be available (see below)
+                    C_Container.PickupContainerItem(bag, slot)
+                    PickupInventoryItem(GetInventorySlotInfo(invSlot.slot))
+
+                    --EquipItemByName(info.hyperlink, GetInventorySlotInfo(invSlot.slot))
+
+                    --it could work better to use container item as the bag/slot are known
+                    --C_Container.UseContainerItem(bag, slot)
+
+                    return true
+                end
+            end
+        end
+        return false;
+    end
+
+    local i = 1;
+    C_Timer.NewTicker(0.01, function() --ticker might not be needed with the pre mapping of empty slots
+        local v = items[i]
+
+        if v.guid then
+            local equipped = false;
+            for bag = 0, 4 do
+                if equipped == false then
+                    for slot = 1, C_Container.GetContainerNumSlots(bag) do
+                        equipped = equipItem(v, bag, slot)
+                    end
+                end
+            end
+
+            if isBankOpen then
+                for slot = 1, C_Container.GetContainerNumSlots(-1) do
+                    equipped = equipItem(v, -1, slot)
+                end
+                for bag = 5, 11 do
+                    if equipped == false then
+                        for slot = 1, C_Container.GetContainerNumSlots(bag) do
+                            equipped = equipItem(v, bag, slot)
+                        end
+                    end
+                end
+            end
+
+        else
+
+            --print(string.format("slot %s is ignored, removing %s", v.slot, tostring(v.link)))
+
+            --the premapped empty slots should remain as anything swapped before would go into the slot created by the new item beign equipped
+            --this will attempt to remove an item and place into an empty slot
+            --if no empty slots exist put the item back into its slot
+            if #bagsWithEmptySlots > 0 then
+                local bag = bagsWithEmptySlots[#bagsWithEmptySlots]
+
+                --print(string.format("attempting to put item in bag %s", bag))
+
+                if bag == 0 then
+                    PickupInventoryItem(GetInventorySlotInfo(v.slot))
+                    PutItemInBackpack()
+                    bagsWithEmptySlots[#bagsWithEmptySlots] = nil
+                else
+                    PickupInventoryItem(GetInventorySlotInfo(v.slot))
+                    PutItemInBag(C_Container.ContainerIDToInventoryID(bag))
+                    bagsWithEmptySlots[#bagsWithEmptySlots] = nil
+                end
+
+                --unequipping unsuccessful so place item back
+                if CursorHasItem() then
+                    PickupInventoryItem(GetInventorySlotInfo(v.slot))
+                end
+            end
+        end
+
+        i = i + 1;
+    end, #items)
+end
 
 
 
@@ -264,12 +440,17 @@ end
 local itemsScanned = {}
 function Equipmate.Api.GetAttributesFromTooltip(link)
 
+    -- print("====================")
+    -- print(link)
+
     if itemsScanned[link] then
         --DevTools_Dump(itemsScanned[item.link])
         return itemsScanned[link]
     else
         itemsScanned[link] = {}
     end
+
+    --itemsScanned[link] = {}
 
     local sockets = {
         "EMPTY_SOCKET_BLUE",
@@ -286,6 +467,44 @@ function Equipmate.Api.GetAttributesFromTooltip(link)
             if region and region:GetObjectType() == "FontString" then
                 local text = region:GetText()
                 if type(text) == "string" then
+
+                    local lb, hyp, ub, school = strsplit(" ", text)
+                    lb = tonumber(lb)
+                    ub = tonumber(ub)
+                    if (type(lb) == "number") and (hyp == "-") and (type(ub) == "number") then
+                        --print(string.format("%s : min %d max %d", link, lb, ub))
+                    end
+
+                    local number = tonumber(text:match("%-?%d+"))
+                    local attribute = text:gsub("%-?%d+", "%%d")
+                    local _, stat = strsplit(" ", attribute)
+
+                    local x = ITEM_MOD_INTELLECT_SHORT
+
+                    for a, b in pairs(Equipmate.Constants.ItemStatGlobals) do
+                        print(type(stat), type(b))
+                        if type(stat) == "string" then
+                            if stat == b then
+                                print("found stat")
+                            end
+                            print(stat, a, b)
+                            print(#stat, #a, #b)
+                        end
+                    end
+
+                    -- print(">"..(stat or "-").."<")
+                    -- print(ITEM_MOD_INTELLECT_SHORT)
+
+
+                    --if Equipmate.Constants.ItemStatGlobals[stat] then
+                    if stat == x then
+                        --print("got stat in table")
+                        --print(x, stat, number)
+                    end
+
+
+
+
                     local number = tonumber(text:match("%-?%d+"))
                     if number then
                         table.insert(itemsScanned[link], {
@@ -400,6 +619,7 @@ function Equipmate.Api.CompareItems(current, alternative)
         end
     end
 
+    --DevTools_Dump({matchingStats, statsLost, statsGained})
     return matchingStats, statsLost, statsGained;
 end
 

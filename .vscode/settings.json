@@ -51,6 +51,11 @@
         "INVTYPE_EQUIPABLESPELL_WEAPON",
         "WEAPON",
         "GameTooltip_SetTitle",
-        "class"
+        "class",
+        "ITEM_MOD_INTELLECT_SHORT",
+        "ITEM_MOD_AGILITY_SHORT",
+        "ITEM_MOD_STRENGTH_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
+        "ITEM_MOD_STAMINA_SHORT"
     ]
 }

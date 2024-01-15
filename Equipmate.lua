@@ -56,6 +56,7 @@ StaticPopupDialogs.NewOutfit = {
 local function CreatePaperDollButtons()
 
     local toggleButton = CreateFrame("BUTTON", addonName.."ToggleButton", PaperDollItemsFrame, "TBDSquareSlotButton")
+    toggleButton:RegisterForClicks("AnyDown")
 
     if RuneFrameControlButton then
         toggleButton:SetPoint("RIGHT", RuneFrameControlButton, "LEFT", -4, 0)
@@ -65,7 +66,8 @@ local function CreatePaperDollButtons()
 
     toggleButton:SetScript("OnEnter", function()
         GameTooltip:SetOwner(toggleButton, "ANCHOR_RIGHT")
-        GameTooltip:AddLine(EQUIPMATE_TT_PAPERDOLL_TOGGLE_BUTTON)
+        GameTooltip:AddLine(EQUIPMATE_TT_PAPERDOLL_TOGGLE_BUTTON_TITLE)
+        GameTooltip:AddLine(EQUIPMATE_TT_PAPERDOLL_TOGGLE_BUTTON_TEXT)
         GameTooltip:Show()
     end)
     toggleButton.icon:SetTexture("Interface/WorldMap/Gear_64")
@@ -73,21 +75,32 @@ local function CreatePaperDollButtons()
     toggleButton.icon:ClearAllPoints()
     toggleButton.icon:SetPoint("CENTER", toggleButton, "CENTER", 0, -2)
     --toggleButton.icon:SetTexCoord(0, 0.5, 0, 0.5)
-    toggleButton.isOpen = true
+    toggleButton.isOpen = false
     
-    toggleButton:SetScript("OnClick", function(f)
-        f.isOpen = not f.isOpen
-        for k, v in ipairs(Equipmate.Constants.PaperDollInventorySlotToggleButtons) do
-            v:SetShown(f.isOpen)
-        end
+    toggleButton:SetScript("OnClick", function(f, but)
 
-        EquipmateUI:SetShown(f.isOpen)
+        --left click to toggle item slot swap flyout
+        if but == "LeftButton" then
+            for k, v in ipairs(Equipmate.Constants.PaperDollInventorySlotToggleButtons) do
+                v:SetShown(not v:IsVisible())
+            end
 
-        if f.isOpen then
-            if EngravingFrame and EngravingFrame:IsVisible() then
-                RuneFrameControlButton:Click()
+        --right click to open full UI
+        else
+            f.isOpen = not f.isOpen
+            for k, v in ipairs(Equipmate.Constants.PaperDollInventorySlotToggleButtons) do
+                v:SetShown(f.isOpen)
+            end
+    
+            EquipmateUI:SetShown(f.isOpen)
+    
+            if f.isOpen then
+                if EngravingFrame and EngravingFrame:IsVisible() then
+                    RuneFrameControlButton:Click()
+                end
             end
         end
+
     end)
 
     local function toggleFlyout(flyoutOpenButton, slotButton, slotID, isVerticle)
@@ -98,7 +111,6 @@ local function CreatePaperDollButtons()
 
         local flyout = EquipmentFlyoutFrame
         flyout:Hide()
-
         flyout:SetSlot(slotID)
         flyout:IsVerticle(isVerticle)
         flyout:SetParent(slotButton)
@@ -115,7 +127,7 @@ local function CreatePaperDollButtons()
 
         local slot = _G[slotName]
 
-        --this key value is used set the texcoords
+        --this key value is used to set the texcoords
         local isVerticle = (info.allignment == "bottom") and true or false
         slot.verticalFlyout = isVerticle;
 
@@ -143,6 +155,8 @@ local function CreatePaperDollButtons()
         button:SetScript("OnEnter", function()
             toggleFlyout(button, slot, info.slotID, isVerticle)
         end)
+
+        button:Hide()
     end
 end
 
@@ -177,6 +191,10 @@ function EquipmateMixin:OnLoad()
     self.outfitConfig.icon:SetTexture("Interface/WorldMap/Gear_64")
     self.outfitConfig.icon:SetTexCoord(0, 0.5, 0, 0.5)
 
+    self.outfitConfig:SetScript("OnClick", function()
+        self:OutfitConfig_OnClick()
+    end)
+
     self.rescanOutfit.icon:SetAtlas("transmog-icon-revert")
     self.rescanOutfit:SetScript("OnClick", function()
         self:RescanEquipment(true)
@@ -191,6 +209,8 @@ function EquipmateMixin:OnLoad()
     Equipmate.CallbackRegistry:RegisterCallback("Database_OnNewOutfit", self.OnNewOutfit, self)
     Equipmate.CallbackRegistry:RegisterCallback("Database_OnOutfitChanged", self.OnOutfitChanged, self)
     Equipmate.CallbackRegistry:RegisterCallback("Database_OnOutfitDeleted", self.Database_OnOutfitDeleted, self)
+
+    Equipmate.CallbackRegistry:RegisterCallback(Equipmate.Constants.CallbackEvents.BankFrameStateChanged, self.SetBankState, self)
 
 
     self.characterHelptip:SetText(L.CHARACTER_HELPTIP)
@@ -210,6 +230,8 @@ function EquipmateMixin:OnLoad()
         StaticPopup_Show("NewOutfit")
     end)
 
+
+    --rework this
     GameTooltip:HookScript('OnShow', function(tooltip)
         local data = tooltip:GetOwner()
         if data.arg1 and data.arg1 == "equipmate-dropdown-tooltip-hook" then
@@ -219,15 +241,72 @@ function EquipmateMixin:OnLoad()
 
 end
 
+function EquipmateMixin:OutfitConfig_OnClick()
+    
+    --Database:SetKeyBindingOutfit(keyBindID, setID)
+
+    -- local outfits = Database:GetOutfits(addon.thisCharacter)
+    -- for k, v in ipairs(outfits) do
+        
+    -- end
+
+    if self.selectedOutfit and self.selectedOutfit.name and self.selectedOutfit.id then
+        local menu = {
+            {
+                text = self.selectedOutfit.name,
+                isTitle = true,
+                notCheckable = true,
+            },
+            {
+                text = "Set Keybind ID",
+                isTitle = true,
+                notCheckable = true,
+            },
+        }
+        table.insert(menu, 2, Equipmate.ContextMenuSeparator)
+
+        for i = 1, 10 do
+            table.insert(menu, {
+                text = i,
+                notCheckable = true,
+                func = function()
+                    Database:SetKeyBindingOutfit(i, self.selectedOutfit.id)
+                end,
+            })
+        end
+
+        EasyMenu(menu, Equipmate.ContextMenu, "cursor", 0, 0, "MENU", 1.25)
+    end
+end
+
+function EquipmateMixin:SetBankState(isOpen)
+    self.isBankOpen = isOpen;
+    Equipmate.Constants.IsBankOpen = isOpen;
+end
+
 
 function EquipmateMixin:OnEvent(event, ...)
     if event == Equipmate.Constants.BlizzardEvents.PlayerEnteringWorld then
         self:PlayerEnteringWorld()
     end
+
+    if event == Equipmate.Constants.BlizzardEvents.BankFrameOpened then
+        Equipmate.CallbackRegistry:TriggerEvent(Equipmate.Constants.CallbackEvents.BankFrameStateChanged, true)
+    end
+
+    if event == Equipmate.Constants.BlizzardEvents.BankFrameClosed then
+        Equipmate.CallbackRegistry:TriggerEvent(Equipmate.Constants.CallbackEvents.BankFrameStateChanged, false)
+    end
 end
 
 function EquipmateMixin:OnShow()
 
+end
+
+function EquipmateMixin:OnHide()
+    for k, v in ipairs(Equipmate.Constants.PaperDollInventorySlotToggleButtons) do
+        v:SetShown(false)
+    end
 end
 
 function EquipmateMixin:Database_OnInitialised()
@@ -352,112 +431,13 @@ function EquipmateMixin:ApplySelectedOutfit(name)
         return
     end
 
-    --these need to be checked for container types - ammo/shards etc
-    local bagsWithEmptySlots = {}
-    local emptySlotindex = 1
-    for bag = 4, 0, -1 do
-        local freeSlots = C_Container.GetContainerFreeSlots(bag)
-        if #freeSlots > 0 then
-            for k, v in ipairs(freeSlots) do
-                bagsWithEmptySlots[emptySlotindex] = bag
-                emptySlotindex = emptySlotindex + 1;
-            end
-        end
-    end
-
-    --DevTools_Dump(bagsWithEmptySlots)
-
-    local function equipItem(invSlot, bag, slot)
-        local info = C_Container.GetContainerItemInfo(bag, slot)
-        if info then
-            local itemLoc = ItemLocation:CreateFromBagAndSlot(bag, slot)
-            if itemLoc then
-                local itemGUID = C_Item.GetItemGUID(itemLoc)
-                if invSlot.guid == itemGUID then
-
-                    --this seems to work well with the bank items
-                    --the logic is to pick up the new item and swap with what was in the slot
-                    --in theory this means that items being removed will have an empty slot waiting
-                    --however ignored slots create a potential issue as they require bag/bank space to be available (see below)
-                    C_Container.PickupContainerItem(bag, slot)
-                    PickupInventoryItem(GetInventorySlotInfo(invSlot.slot))
-
-                    --EquipItemByName(info.hyperlink, GetInventorySlotInfo(invSlot.slot))
-
-                    --it could work better to use container item as the bag/slot are known
-                    --C_Container.UseContainerItem(bag, slot)
-
-                    return true
-                end
-            end
-        end
-        return false;
-    end
-
-    local i = 1;
-    C_Timer.NewTicker(0.01, function() --ticker might not be needed with the pre mapping of empty slots
-        local v = self.selectedOutfit.items[i]
-
-        if v.guid then
-            local equipped = false;
-            for bag = 0, 4 do
-                if equipped == false then
-                    for slot = 1, C_Container.GetContainerNumSlots(bag) do
-                        equipped = equipItem(v, bag, slot)
-                    end
-                end
-            end
-
-            if BankFrame:IsVisible() then
-                for slot = 1, C_Container.GetContainerNumSlots(-1) do
-                    equipped = equipItem(v, -1, slot)
-                end
-                for bag = 5, 11 do
-                    if equipped == false then
-                        for slot = 1, C_Container.GetContainerNumSlots(bag) do
-                            equipped = equipItem(v, bag, slot)
-                        end
-                    end
-                end
-            end
-
-        else
-
-            --print(string.format("slot %s is ignored, removing %s", v.slot, tostring(v.link)))
-
-            --the premapped empty slots should remain as anything swapped before would go into the slot created by the new item beign equipped
-            --this will attempt to remove an item and place into an empty slot
-            --if no empty slots exist put the item back into its slot
-            if #bagsWithEmptySlots > 0 then
-                local bag = bagsWithEmptySlots[#bagsWithEmptySlots]
-
-                --print(string.format("attempting to put item in bag %s", bag))
-
-                if bag == 0 then
-                    PickupInventoryItem(GetInventorySlotInfo(v.slot))
-                    PutItemInBackpack()
-                    bagsWithEmptySlots[#bagsWithEmptySlots] = nil
-                else
-                    PickupInventoryItem(GetInventorySlotInfo(v.slot))
-                    PutItemInBag(C_Container.ContainerIDToInventoryID(bag))
-                    bagsWithEmptySlots[#bagsWithEmptySlots] = nil
-                end
-
-                --unequipping unsuccessful so place item back
-                if CursorHasItem() then
-                    PickupInventoryItem(GetInventorySlotInfo(v.slot))
-                end
-            end
-        end
-
-        i = i + 1;
-    end, #self.selectedOutfit.items)
+    Equipmate.Api.EquipItemSet(self.selectedOutfit.items, self.isBankOpen)
 
 end
 
 function EquipmateMixin:LoadOutfitItems(items)
 
-    local outfitItemInfo = Equipmate.Api.GetItemSetInfo(items)
+    local outfitItemInfo = Equipmate.Api.GetInfoForEquipmentSetItems(items)
     self.outfitInfoLeft:SetText(string.format("%d items", outfitItemInfo.numItems))
     self.outfitInfoRight:SetText(string.format("Ilvl %s", outfitItemInfo.averageItemLevel))
 
@@ -654,6 +634,11 @@ function EquipmentFlyoutFrameMixin:OnLoad()
         end
     end)
 
+    Equipmate.CallbackRegistry:RegisterCallback(Equipmate.Constants.CallbackEvents.BankFrameStateChanged, self.SetBankState, self)
+
+end
+function EquipmentFlyoutFrameMixin:SetBankState(isOpen)
+    self.isBankOpen = isOpen;
 end
 function EquipmentFlyoutFrameMixin:IsVerticle(isVerticle)
     self.isVerticle = isVerticle;
@@ -713,7 +698,7 @@ function EquipmentFlyoutFrameMixin:Update()
         return;
     end
 
-    self.items = Equipmate.Api.GetItemsForInvSlot(self.slotID, false)
+    self.items = Equipmate.Api.GetItemsForInvSlot(self.slotID, self.isBankOpen)
     
     for k, v in ipairs(self.buttons) do
         v:Hide()

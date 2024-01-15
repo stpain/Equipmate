@@ -1,0 +1,32 @@
+<Bindings>
+    <Binding name="Equipment Set ID 1" category="Equipmate ">
+        Equipmate.Api.EquipItemsFromKeyBinding(1)
+    </Binding>
+    <Binding name="Equipment Set ID 2" category="Equipmate ">
+        Equipmate.Api.EquipItemsFromKeyBinding(2)
+    </Binding>
+    <Binding name="Equipment Set ID 3" category="Equipmate ">
+        Equipmate.Api.EquipItemsFromKeyBinding(3)
+    </Binding>
+    <Binding name="Equipment Set ID 4" category="Equipmate ">
+        Equipmate.Api.EquipItemsFromKeyBinding(4)
+    </Binding>
+    <Binding name="Equipment Set ID 5" category="Equipmate ">
+        Equipmate.Api.EquipItemsFromKeyBinding(5)
+    </Binding>
+    <Binding name="Equipment Set ID 6" category="Equipmate ">
+        Equipmate.Api.EquipItemsFromKeyBinding(6)
+    </Binding>
+    <Binding name="Equipment Set ID 7" category="Equipmate ">
+        Equipmate.Api.EquipItemsFromKeyBinding(7)
+    </Binding>
+    <Binding name="Equipment Set ID 8" category="Equipmate ">
+        Equipmate.Api.EquipItemsFromKeyBinding(8)
+    </Binding>
+    <Binding name="Equipment Set ID 9" category="Equipmate ">
+        Equipmate.Api.EquipItemsFromKeyBinding(9)
+    </Binding>
+    <Binding name="Equipment Set ID 10" category="Equipmate ">
+        Equipmate.Api.EquipItemsFromKeyBinding(10)
+    </Binding>
+</Bindings>

@@ -42,7 +42,7 @@
 	</Frame>
 
 
-    <Frame name="EquipmateUI" mixin="EquipmateMixin" parent="PaperDollFrame" inherits="ButtonFrameTemplate" frameStrata="HIGH" enableMouse="true">
+    <Frame name="EquipmateUI" mixin="EquipmateMixin" parent="PaperDollFrame" inherits="ButtonFrameTemplate" frameStrata="HIGH" enableMouse="true" hidden="true">
 
         <Size x="300" y="420"/>
         <Anchors>
@@ -102,7 +102,8 @@
                     <Anchor point="TOPRIGHT" x="-7" y="-26"/>
                 </Anchors>
                 <KeyValues>
-                    <KeyValue key="tooltipText" value="EQUIPMATE_TT_UI_OUTFIT_CONFIG_BUTTON" type="global"/>
+                    <KeyValue key="tooltipTitle" value="EQUIPMATE_TT_UI_OUTFIT_CONFIG_BUTTON_TITLE" type="global"/>
+                    <KeyValue key="tooltipText" value="EQUIPMATE_TT_UI_OUTFIT_CONFIG_BUTTON_TEXT" type="global"/>
                 </KeyValues>
             </Button>
 
@@ -155,6 +156,7 @@
         <Scripts>
             <OnLoad method="OnLoad"/>
             <OnShow method="OnShow"/>
+            <OnHide method="OnHide"/>
             <OnEvent method="OnEvent"/>
             <OnDragStart>
                 self:StartMoving()

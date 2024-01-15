@@ -60,13 +60,18 @@
 					</Anchors>
 				</Texture>
 			</Layer>
-			<!-- <Layer level="OVERLAY">
+			<Layer level="OVERLAY">
 				<Texture parentKey="UpgradeIcon" atlas="bags-greenarrow" useAtlasSize="true" hidden="true">
 					<Anchors>
-						<Anchor point="TOPLEFT" x="0" y="0"/>
+						<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
 					</Anchors>
 				</Texture>
-			</Layer> -->
+                <FontString parentKey="topLeft" inherits="NumberFontNormal">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" x="1" y="-2"/>
+                    </Anchors>
+                </FontString>
+			</Layer>
 		</Layers>
 		<Scripts>
 			<OnLeave>

@@ -36,16 +36,22 @@ Equipmate.Constants.PaperDollInventorySlotToggleButtons = {}
 
 Equipmate.Constants.BlizzardEvents = {
     AddonLoaded = "ADDON_LOADED",
-    PlayerEnteringWorld = "PLAYER_ENTERING_WORLD"
+    PlayerEnteringWorld = "PLAYER_ENTERING_WORLD",
+    BankFrameOpened = "BANKFRAME_OPENED",
+    BankFrameClosed = "BANKFRAME_CLOSED",
 }
 
 Equipmate.Constants.CallbackEvents = {
-    "Database_OnInitialised",
-    "Database_OnConfigChanged",
-    "Database_OnNewOutfit",
-    "Database_OnOutfitChanged",
-    "Database_OnOutfitDeleted",
+    DatabaseOnInitialised = "Database_OnInitialised",
+    DatabaseOnConfigChanged = "Database_OnConfigChanged",
+    DatabaseOnNewOutfit = "Database_OnNewOutfit",
+    DatabaseOnOutfitChanged = "Database_OnOutfitChanged",
+    DatabaseOnOutfitDeleted = "Database_OnOutfitDeleted",
+
+    BankFrameStateChanged = "BankFrame_StateChanged",
 }
+
+Equipmate.Constants.IsBankOpen = false;
 
 Equipmate.Constants.ItemQualityAtlas = {
     [2] = "bags-glow-green",
@@ -236,4 +242,12 @@ Equipmate.Constants.FlyoutButtonsFrameLayout = {
     LeftEdge = { atlas = "!ChatBubble-NineSlice-EdgeLeft", },
     RightEdge = { atlas = "!ChatBubble-NineSlice-EdgeRight", },
     Center = { atlas = "ChatBubble-NineSlice-Center", },
+}
+
+Equipmate.Constants.ItemStatGlobals = {
+    Intellect = ITEM_MOD_INTELLECT_SHORT,
+    Agility = ITEM_MOD_AGILITY_SHORT,
+    Strength = ITEM_MOD_STRENGTH_SHORT,
+    Spirit = ITEM_MOD_SPIRIT_SHORT,
+    Stamina = ITEM_MOD_STAMINA_SHORT,
 }
