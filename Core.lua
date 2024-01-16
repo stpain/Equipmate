@@ -49,6 +49,8 @@ Equipmate.Constants.CallbackEvents = {
     DatabaseOnOutfitDeleted = "Database_OnOutfitDeleted",
 
     BankFrameStateChanged = "BankFrame_StateChanged",
+
+    OutfitSetSlotIgnore = "Outfit_SetSlotIgnore"
 }
 
 Equipmate.Constants.IsBankOpen = false;
@@ -184,7 +186,7 @@ Equipmate.Constants.GlobalNameToInvSlot = {
     ["INVTYPE_RANGED"] = 18,
     ["INVTYPE_RANGEDRIGHT"] = 18,
     ["INVTYPE_TABARD"] = 19,
-    ["INVTYPE_WEAPON"] = 16,
+    ["INVTYPE_WEAPON"] = {16, 17},
     ["INVTYPE_2HWEAPON"] = 16,
     ["INVTYPE_WEAPONMAINHAND"] = 16,
     ["INVTYPE_WEAPONOFFHAND"] = 17,
@@ -209,6 +211,11 @@ Equipmate.Constants.ClassIdArmorType = {
     [12] = 2, --dh
 }
 
+Equipmate.Constants.ClassSkillSpellId = {
+    DualWield = 674,
+    Shields = 9116,
+}
+
 Equipmate.Constants.ItemSubClassIdToArmorSkillSpellId = {
     [Enum.ItemArmorSubclass.Cloth] = 9078,
     [Enum.ItemArmorSubclass.Leather] = 9077,
@@ -230,6 +237,7 @@ Equipmate.Constants.ItemSubClassIdToWeaponSkillSpellId = {
     [Enum.ItemWeaponSubclass.Fishingpole] = 7738,
     [Enum.ItemWeaponSubclass.Guns] = 266,
     [Enum.ItemWeaponSubclass.Bows] = 264,
+    [Enum.ItemWeaponSubclass.Crossbow] = 5011,
 }
 
 Equipmate.Constants.FlyoutButtonsFrameLayout = {

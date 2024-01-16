@@ -124,101 +124,88 @@ end
 
 
 ---Performs checks on the item provided to see if it fits the inventory slot and class/character skills
----@param invSlot number paperedoll inventory slot ID
----@param link string item hyperlink
----@param bag number bagID
----@param slot number slotID (bag)
----@return boolean, table
-function Equipmate.Api.TestItemForClassAndSlot(invSlot, link, bag, slot, ignoreSkillCheck)
+---@return boolean
+function Equipmate.Api.TestItemForClassAndSlot(unitClassID, equipLoc, itemClassID, itemSubClassID, invSlot, ignoreSkillCheck)
 
-    --print("checkign item", link)
-
-    local armorCheck, weaponCheck = true, true;
-    local _, _, _, equipLoc, icon, itemClassID, itemSubClassID = GetItemInfoInstant(link)
-    if itemClassID == 2 or itemClassID == 4 then
-        --print(link, equipLoc, itemClassID, itemSubClassID)
-
-        if (itemClassID == 2) and (not ignoreSkillCheck) then
-            local weaponSpellID = Equipmate.Constants.ItemSubClassIdToWeaponSkillSpellId[itemSubClassID]
-            if weaponSpellID then
-                weaponCheck = IsPlayerSpell(weaponSpellID)
-            end
+    local armorCheck, weaponCheck = false, false;
+    if (itemClassID == 2) and (not ignoreSkillCheck) then
+        local weaponSpellID = Equipmate.Constants.ItemSubClassIdToWeaponSkillSpellId[itemSubClassID]
+        if type(weaponSpellID) == "number" then
+            weaponCheck = IsPlayerSpell(weaponSpellID)
         end
 
-
-        if itemClassID == 4 then
-            --[[
-                TODO:
-                    make class table for these subClassID, ie librams for paladins etc
-            ]]
-
-            -- Spellstones, Firestones, Trinkets, Rings and Necks
-            if itemSubClassID == 0 then
-
-            --cosmetic
-            elseif itemSubClassID == 5 then
-
-            --shields
-            elseif itemSubClassID == 6 then
-                
-            --librams
-            elseif itemSubClassID == 7 then
-                
-            --idols
-            elseif itemSubClassID == 8 then
-                
-            --totems
-            elseif itemSubClassID == 9 then
-                
-            --sigil
-            elseif itemSubClassID == 10 then
-                
-            --relic
-            elseif itemSubClassID == 11 then
-
-            else
-                --it shouldn't go out of these bounds but just check
-                if (itemSubClassID >= 1) and (itemSubClassID <= 4) then
-                    armorCheck = IsPlayerSpell(Equipmate.Constants.ItemSubClassIdToArmorSkillSpellId[itemSubClassID])
-                end
-            end
+        --override for generic (skinning knife)
+        if itemSubClassID == Enum.ItemWeaponSubclass.Generic then
+            weaponCheck = true;
         end
+    end
 
-        local invSlotID = Equipmate.Constants.GlobalNameToInvSlot[equipLoc]
-        local match;
-        if type(invSlotID) == "table" then
-            for k, v in ipairs(invSlotID) do
-                if v == invSlot then
-                    match = v;
-                end
-            end
+
+    if itemClassID == 4 then
+        --[[
+            TODO:
+                make class table for these subClassID, ie librams for paladins etc
+        ]]
+
+        -- Spellstones, Firestones, Trinkets, Rings and Necks
+        if itemSubClassID == 0 then
+
+            --mostly these items are usable by all classes
+            armorCheck = true;
+
+
+        --cosmetic
+        elseif itemSubClassID == 5 then
+
+        --shields
+        elseif itemSubClassID == 6 then
+            armorCheck = IsPlayerSpell(Equipmate.Constants.ClassSkillSpellId.Shields)
+            
+        --librams
+        elseif itemSubClassID == 7 then
+            
+        --idols
+        elseif itemSubClassID == 8 then
+            
+        --totems
+        elseif itemSubClassID == 9 then
+            
+        --sigil
+        elseif itemSubClassID == 10 then
+            
+        --relic
+        elseif itemSubClassID == 11 then
+
         else
-            match = invSlotID
-        end
-
-        if weaponCheck and armorCheck and (invSlot == match) then
-
-            --print(string.format("got to the item GUID call using bag %s and slot %s", bag, slot))
-
-            local info = C_Container.GetContainerItemInfo(bag, slot)
-            if info and info.hyperlink then
-                local itemLoc = ItemLocation:CreateFromBagAndSlot(bag, slot)
-                if itemLoc then
-                    local guid = C_Item.GetItemGUID(itemLoc)
-                    return true, {
-                        link = link,
-                        guid = guid,
-                        invSlotID = match,
-                        icon = icon,
-                        bag = bag,
-                        slot = slot,
-                    }
-                end
+            --it shouldn't go out of these bounds but just check
+            if (itemSubClassID >= 1) and (itemSubClassID <= 4) and (type(Equipmate.Constants.ItemSubClassIdToArmorSkillSpellId[itemSubClassID]) == "number") then
+                armorCheck = IsPlayerSpell(Equipmate.Constants.ItemSubClassIdToArmorSkillSpellId[itemSubClassID])
             end
         end
     end
 
-    return false, {}
+    --local canDualWield = IsPlayerSpell(Equipmate.Constants.ClassSkillSpellId.DualWield)
+
+    local invSlotID = Equipmate.Constants.GlobalNameToInvSlot[equipLoc]
+    local slotMatch;
+    if type(invSlotID) == "table" then
+        for k, v in ipairs(invSlotID) do
+            if v == invSlot then
+                slotMatch = v;
+            end
+        end
+    else
+        slotMatch = invSlotID
+    end
+
+    if (weaponCheck or armorCheck) and (invSlot == slotMatch) then
+
+        --print(string.format("got to the item GUID call using bag %s and slot %s", bag, slot))
+
+        return true
+    end
+
+    return false
 end
 
 
@@ -228,6 +215,8 @@ end
 ---@return table items an ipairs table of items
 function Equipmate.Api.GetItemsForInvSlot(invSlot, includeBank)
 
+    local _, _, classID = UnitClass("player")
+
     local items = {}
 
     local link = GetInventoryItemLink('player', invSlot)
@@ -236,11 +225,23 @@ function Equipmate.Api.GetItemsForInvSlot(invSlot, includeBank)
         for slot = 1, C_Container.GetContainerNumSlots(bag) do
             local info = C_Container.GetContainerItemInfo(bag, slot)
             if info and info.hyperlink then
-                local match, item = Equipmate.Api.TestItemForClassAndSlot(invSlot, info.hyperlink, bag, slot, IsShiftKeyDown())
-                if match then
-                    table.insert(items, item)
-
-                    --Equipmate.Api.CompareItems(link, info.hyperlink)
+                local _, _, _, equipLoc, icon, itemClassID, itemSubClassID = GetItemInfoInstant(info.hyperlink)
+                if itemClassID == 2 or itemClassID == 4 then
+                    local match = Equipmate.Api.TestItemForClassAndSlot(classID, equipLoc, itemClassID, itemSubClassID, invSlot, IsShiftKeyDown())
+                    if match then
+                        local itemLoc = ItemLocation:CreateFromBagAndSlot(bag, slot)
+                        if itemLoc then
+                            local guid = C_Item.GetItemGUID(itemLoc)
+                            table.insert(items, {
+                                link = info.hyperlink,
+                                guid = guid,
+                                invSlotID = invSlot,
+                                icon = icon,
+                                bag = bag,
+                                slot = slot,
+                            })
+                        end
+                    end
                 end
             end
         end
@@ -252,9 +253,23 @@ function Equipmate.Api.GetItemsForInvSlot(invSlot, includeBank)
         for slot = 1, C_Container.GetContainerNumSlots(-1) do
             local info = C_Container.GetContainerItemInfo(-1, slot)
             if info and info.hyperlink then
-                local match, item = Equipmate.Api.TestItemForClassAndSlot(invSlot, info.hyperlink, -1, slot, IsShiftKeyDown())
-                if match then
-                    table.insert(items, item)
+                local _, _, _, equipLoc, icon, itemClassID, itemSubClassID = GetItemInfoInstant(info.hyperlink)
+                if itemClassID == 2 or itemClassID == 4 then
+                    local match, slotID = Equipmate.Api.TestItemForClassAndSlot(classID, equipLoc, itemClassID, itemSubClassID, invSlot, IsShiftKeyDown())
+                    if match then
+                        local itemLoc = ItemLocation:CreateFromBagAndSlot(-1, slot)
+                        if itemLoc then
+                            local guid = C_Item.GetItemGUID(itemLoc)
+                            table.insert(items, {
+                                link = info.hyperlink,
+                                guid = guid,
+                                invSlotID = invSlot,
+                                icon = icon,
+                                bag = -1,
+                                slot = slot,
+                            })
+                        end
+                    end
                 end
             end
         end
@@ -264,9 +279,23 @@ function Equipmate.Api.GetItemsForInvSlot(invSlot, includeBank)
             for slot = 1, C_Container.GetContainerNumSlots(bag) do
                 local info = C_Container.GetContainerItemInfo(bag, slot)
                 if info and info.hyperlink then
-                    local match, item = Equipmate.Api.TestItemForClassAndSlot(invSlot, info.hyperlink, bag, slot, IsShiftKeyDown())
-                    if match then
-                        table.insert(items, item)
+                    local _, _, _, equipLoc, icon, itemClassID, itemSubClassID = GetItemInfoInstant(info.hyperlink)
+                    if itemClassID == 2 or itemClassID == 4 then
+                        local match, slotID = Equipmate.Api.TestItemForClassAndSlot(classID, equipLoc, itemClassID, itemSubClassID, invSlot, IsShiftKeyDown())
+                        if match then
+                            local itemLoc = ItemLocation:CreateFromBagAndSlot(bag, slot)
+                            if itemLoc then
+                                local guid = C_Item.GetItemGUID(itemLoc)
+                                table.insert(items, {
+                                    link = info.hyperlink,
+                                    guid = guid,
+                                    invSlotID = invSlot,
+                                    icon = icon,
+                                    bag = bag,
+                                    slot = slot,
+                                })
+                            end
+                        end
                     end
                 end
             end
@@ -354,57 +383,62 @@ function Equipmate.Api.EquipItemSet(items, isBankOpen)
     C_Timer.NewTicker(0.01, function() --ticker might not be needed with the pre mapping of empty slots
         local v = items[i]
 
-        if v.guid then
-            local equipped = false;
-            for bag = 0, 4 do
-                if equipped == false then
-                    for slot = 1, C_Container.GetContainerNumSlots(bag) do
-                        equipped = equipItem(v, bag, slot)
-                    end
-                end
-            end
-
-            if isBankOpen then
-                for slot = 1, C_Container.GetContainerNumSlots(-1) do
-                    equipped = equipItem(v, -1, slot)
-                end
-                for bag = 5, 11 do
+        if v.ignored then
+            --do nothing user is ignoring this slot
+        else
+            if v.guid then
+                local equipped = false;
+                for bag = 0, 4 do
                     if equipped == false then
                         for slot = 1, C_Container.GetContainerNumSlots(bag) do
                             equipped = equipItem(v, bag, slot)
                         end
                     end
                 end
-            end
-
-        else
-
-            --print(string.format("slot %s is ignored, removing %s", v.slot, tostring(v.link)))
-
-            --the premapped empty slots should remain as anything swapped before would go into the slot created by the new item beign equipped
-            --this will attempt to remove an item and place into an empty slot
-            --if no empty slots exist put the item back into its slot
-            if #bagsWithEmptySlots > 0 then
-                local bag = bagsWithEmptySlots[#bagsWithEmptySlots]
-
-                --print(string.format("attempting to put item in bag %s", bag))
-
-                if bag == 0 then
-                    PickupInventoryItem(GetInventorySlotInfo(v.slot))
-                    PutItemInBackpack()
-                    bagsWithEmptySlots[#bagsWithEmptySlots] = nil
-                else
-                    PickupInventoryItem(GetInventorySlotInfo(v.slot))
-                    PutItemInBag(C_Container.ContainerIDToInventoryID(bag))
-                    bagsWithEmptySlots[#bagsWithEmptySlots] = nil
+    
+                if isBankOpen then
+                    for slot = 1, C_Container.GetContainerNumSlots(-1) do
+                        equipped = equipItem(v, -1, slot)
+                    end
+                    for bag = 5, 11 do
+                        if equipped == false then
+                            for slot = 1, C_Container.GetContainerNumSlots(bag) do
+                                equipped = equipItem(v, bag, slot)
+                            end
+                        end
+                    end
                 end
-
-                --unequipping unsuccessful so place item back
-                if CursorHasItem() then
-                    PickupInventoryItem(GetInventorySlotInfo(v.slot))
+    
+            else
+    
+                --print(string.format("slot %s is ignored, removing %s", v.slot, tostring(v.link)))
+    
+                --the premapped empty slots should remain as anything swapped before would go into the slot created by the new item beign equipped
+                --this will attempt to remove an item and place into an empty slot
+                --if no empty slots exist put the item back into its slot
+                if #bagsWithEmptySlots > 0 then
+                    local bag = bagsWithEmptySlots[#bagsWithEmptySlots]
+    
+                    --print(string.format("attempting to put item in bag %s", bag))
+    
+                    if bag == 0 then
+                        PickupInventoryItem(GetInventorySlotInfo(v.slot))
+                        PutItemInBackpack()
+                        bagsWithEmptySlots[#bagsWithEmptySlots] = nil
+                    else
+                        PickupInventoryItem(GetInventorySlotInfo(v.slot))
+                        PutItemInBag(C_Container.ContainerIDToInventoryID(bag))
+                        bagsWithEmptySlots[#bagsWithEmptySlots] = nil
+                    end
+    
+                    --unequipping unsuccessful so place item back
+                    if CursorHasItem() then
+                        PickupInventoryItem(GetInventorySlotInfo(v.slot))
+                    end
                 end
             end
         end
+
 
         i = i + 1;
     end, #items)

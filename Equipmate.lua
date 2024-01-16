@@ -70,11 +70,10 @@ local function CreatePaperDollButtons()
         GameTooltip:AddLine(EQUIPMATE_TT_PAPERDOLL_TOGGLE_BUTTON_TEXT)
         GameTooltip:Show()
     end)
-    toggleButton.icon:SetTexture("Interface/WorldMap/Gear_64")
+    --toggleButton.icon:SetTexture("Interface/WorldMap/Gear_64")
     toggleButton.icon:SetAtlas("transmog-nav-slot-head")
     toggleButton.icon:ClearAllPoints()
     toggleButton.icon:SetPoint("CENTER", toggleButton, "CENTER", 0, -2)
-    --toggleButton.icon:SetTexCoord(0, 0.5, 0, 0.5)
     toggleButton.isOpen = false
     
     toggleButton:SetScript("OnClick", function(f, but)
@@ -149,9 +148,9 @@ local function CreatePaperDollButtons()
 
         table.insert(Equipmate.Constants.PaperDollInventorySlotToggleButtons, button)
 
-        button:SetScript("OnLeave", function(slotButton)
-            --slotButton:Click()
-        end)
+        -- button:SetScript("OnLeave", function(slotButton)
+        --     slotButton:Click()
+        -- end)
         button:SetScript("OnEnter", function()
             toggleFlyout(button, slot, info.slotID, isVerticle)
         end)
@@ -211,6 +210,7 @@ function EquipmateMixin:OnLoad()
     Equipmate.CallbackRegistry:RegisterCallback("Database_OnOutfitDeleted", self.Database_OnOutfitDeleted, self)
 
     Equipmate.CallbackRegistry:RegisterCallback(Equipmate.Constants.CallbackEvents.BankFrameStateChanged, self.SetBankState, self)
+    Equipmate.CallbackRegistry:RegisterCallback(Equipmate.Constants.CallbackEvents.OutfitSetSlotIgnore, self.SetSlotIgnore, self)
 
 
     self.characterHelptip:SetText(L.CHARACTER_HELPTIP)
@@ -242,8 +242,6 @@ function EquipmateMixin:OnLoad()
 end
 
 function EquipmateMixin:OutfitConfig_OnClick()
-    
-    --Database:SetKeyBindingOutfit(keyBindID, setID)
 
     -- local outfits = Database:GetOutfits(addon.thisCharacter)
     -- for k, v in ipairs(outfits) do
@@ -281,9 +279,18 @@ end
 
 function EquipmateMixin:SetBankState(isOpen)
     self.isBankOpen = isOpen;
-    Equipmate.Constants.IsBankOpen = isOpen;
+    Equipmate.Constants.IsBankOpen = isOpen; --update to this constant for other areas
 end
 
+function EquipmateMixin:SetSlotIgnore(slotID, ignored)
+    if self.selectedOutfit and self.selectedOutfit.name then
+        for k, v in ipairs(self.selectedOutfit.items) do
+            if v.slotID == slotID then
+                v.ignored = ignored
+            end
+        end
+    end
+end
 
 function EquipmateMixin:OnEvent(event, ...)
     if event == Equipmate.Constants.BlizzardEvents.PlayerEnteringWorld then
@@ -441,38 +448,11 @@ function EquipmateMixin:LoadOutfitItems(items)
     self.outfitInfoLeft:SetText(string.format("%d items", outfitItemInfo.numItems))
     self.outfitInfoRight:SetText(string.format("Ilvl %s", outfitItemInfo.averageItemLevel))
 
-    -- local _, _, classID = UnitClass("player")
-    -- local itemsAdded = {}
-    -- local function createEquipmentItemEntry(item, bag, slot)
-    --     local match, _ = Equipmate.Api.TestItemForClassAndSlot(classID, item.slotID, item.link, bag, slot)
-    --     if match then
-    --         local itemLoc = ItemLocation:CreateFromBagAndSlot(bag, slot)
-    --         if itemLoc then
-    --             local itemGUID = C_Item.GetItemGUID(itemLoc)
-    --             if not itemsAdded[itemGUID] then
-    --                 itemsAdded[itemGUID] = true
-    --                 return {
-    --                     text = item.link,
-    --                     notCheckable = true,
-    --                     func = function()
-    --                         item.link = item.link
-    --                         item.guid = itemGUID
-    --                         Equipmate.CallbackRegistry:TriggerEvent("Database_OnOutfitChanged", self.selectedOutfit)
-    --                     end,
-    --                     arg1 = "equipmate-dropdown-tooltip-hook",
-    --                     arg2 = item.link,
-    --                     tooltipOnButton = true,
-    --                     tooltipTitle = addonName,
-    --                 }
-    --             end
-    --         end
-    --     end
-    -- end
-
     local t = {}
     for k, item in ipairs(items) do
         table.insert(t, {
             label = item.link,
+            --iconRight = (item.ignored == true) and 255352 or nil,
             icon = item.icon,
             iconSize = { 22, 22 },
             onMouseEnter = function(f)
@@ -482,85 +462,6 @@ function EquipmateMixin:LoadOutfitItems(items)
                     GameTooltip:Show()
                 end
             end,
-            -- onMouseDown = function(f, b)
-            --     if b == "RightButton" and self.selectedOutfit then
-            --         local menu = {
-            --             {
-            --                 text = string.format("Choose item - |cffffffff%s", _G[item.slot]),
-            --                 isTitle = true,
-            --                 notCheckable = true,
-            --             },
-            --             {
-            --                 text = IGNORE,
-            --                 notCheckable = true,
-            --                 func = function()
-            --                     item.link = false
-            --                     item.guid = false
-            --                     Equipmate.CallbackRegistry:TriggerEvent("Database_OnOutfitChanged", self.selectedOutfit)
-            --                 end,
-            --             },
-            --         }
-
-            --         local equippedItems = Equipmate.Api.GetPlayerEquipment()
-            --         for k, v1 in ipairs(equippedItems) do
-            --             if (item.slot == v1.slot) and (v1.link ~= false) then
-            --                 table.insert(menu, {
-            --                     text = string.format("Current: %s", v1.link),
-            --                     notCheckable = true,
-            --                     func = function()
-            --                         item.link = v1.link
-            --                         item.guid = v1.guid
-            --                         Equipmate.CallbackRegistry:TriggerEvent("Database_OnOutfitChanged", self.selectedOutfit)
-            --                     end,
-            --                 })
-            --             end
-            --         end
-
-            --         table.insert(menu, Equipmate.ContextMenuSeparator)
-
-            --         for bag = 0, 4 do
-            --             for slot = 1, C_Container.GetContainerNumSlots(bag) do
-            --                 local itemEntry = createEquipmentItemEntry(item, bag, slot)
-            --                 if type(itemEntry) == "table" then
-            --                     table.insert(menu, itemEntry)
-            --                 end
-            --             end
-            --         end
-
-            --         if BankFrame:IsVisible() then
-            --             table.insert(menu, Equipmate.ContextMenuSeparator)
-            --             table.insert(menu, {
-            --                 text = "Items in Bank",
-            --                 isTitle = true,
-            --                 notCheckable = true,
-            --             })
-
-            --             for slot = 1, C_Container.GetContainerNumSlots(-1) do
-            --                 local itemEntry = createEquipmentItemEntry(item, -1, slot)
-            --                 if type(itemEntry) == "table" then
-            --                     table.insert(menu, itemEntry)
-            --                 end
-            --             end
-            --             for bag = 5, 11 do
-            --                 for slot = 1, C_Container.GetContainerNumSlots(bag) do
-            --                     local itemEntry = createEquipmentItemEntry(item, bag, slot)
-            --                     if type(itemEntry) == "table" then
-            --                         table.insert(menu, itemEntry)
-            --                     end
-            --                 end
-            --             end
-            --         else
-            --             table.insert(menu, Equipmate.ContextMenuSeparator)
-            --             table.insert(menu, {
-            --                 text = "Bank items not available.",
-            --                 isTitle = true,
-            --                 notCheckable = true,
-            --             })
-            --         end
-
-            --         EasyMenu(menu, Equipmate.ContextMenu, "cursor", 0, 0, "MENU", 1.25)
-            --     end
-            -- end,
         })
     end
     self.equipmentListview.scrollView:SetDataProvider(CreateDataProvider(t))
@@ -607,17 +508,17 @@ function EquipmentFlyoutFrameMixin:OnLoad()
     self.buttons = {}
     self.slotID = false
 
-    -- local ignoreSlotButton = CreateFrame("BUTTON", string.format("%sEquipmentFlyoutButton%s", addonName, "1"), self.buttonFrame, "EquipmentFlyoutButtonTemplate")
-    -- ignoreSlotButton:SetNormalTexture(255352)
-    -- ignoreSlotButton:SetSize(40,40)
-    -- ignoreSlotButton:SetTooltip(L.FLYOUT_IGNORE_SLOT)
-    -- self.buttons[1] = ignoreSlotButton;
+    local ignoreSlotButton = CreateFrame("BUTTON", string.format("%sEquipmentFlyoutButton%s", addonName, "1"), self.buttonFrame, "EquipmentFlyoutButtonTemplate")
+    ignoreSlotButton:SetNormalTexture(255352)
+    ignoreSlotButton:SetSize(40,40)
+    ignoreSlotButton:SetTooltip(L.FLYOUT_IGNORE_SLOT)
+    self.buttons[1] = ignoreSlotButton;
 
-    local putInBagButton = CreateFrame("BUTTON", string.format("%sEquipmentFlyoutButton%s", addonName, "1"), self.buttonFrame, "EquipmentFlyoutButtonTemplate")
+    local putInBagButton = CreateFrame("BUTTON", string.format("%sEquipmentFlyoutButton%s", addonName, "2"), self.buttonFrame, "EquipmentFlyoutButtonTemplate")
     putInBagButton:SetNormalTexture(255351)
     putInBagButton:SetSize(40,40)
     putInBagButton:SetTooltip(L.FLYOUT_PUT_IN_BAG)
-    self.buttons[1] = putInBagButton;
+    self.buttons[2] = putInBagButton;
 
     NineSliceUtil.ApplyLayout(self.buttonFrame, Equipmate.Constants.FlyoutButtonsFrameLayout)
 
@@ -704,9 +605,9 @@ function EquipmentFlyoutFrameMixin:Update()
         v:Hide()
     end
     self.buttons[1]:Show()
-    --self.buttons[2]:Show()
+    self.buttons[2]:Show()
 
-    self.buttons[1]:SetScript("OnClick", function()
+    self.buttons[2]:SetScript("OnClick", function()
         for bag = 0, 4 do
             local freeSlots = C_Container.GetContainerFreeSlots(bag)
             if #freeSlots > 0 then
@@ -715,13 +616,13 @@ function EquipmentFlyoutFrameMixin:Update()
             end
         end
     end)
-    --self.buttons[1]:SetScript("OnClick", function()
-        --code this to ignore this slot on equipment sets
-    --end)
+    self.buttons[1]:SetScript("OnClick", function()
+        Equipmate.CallbackRegistry:TriggerEvent(Equipmate.Constants.CallbackEvents.OutfitSetSlotIgnore, self.slotID, true)
+    end)
 
     if #self.items > 0 then
         for k, item in ipairs(self.items) do
-            local buttonIndex = k+1
+            local buttonIndex = k+2
             if not self.buttons[buttonIndex] then
                 local button = CreateFrame("BUTTON", string.format("%sEquipmentFlyoutButton%s", addonName, buttonIndex), self.buttonFrame, "EquipmentFlyoutButtonTemplate")
                 button:SetSize(40,40)
@@ -741,7 +642,7 @@ function EquipmentFlyoutFrameMixin:Update()
             button:SetPoint("TOP", 0, (i * -40) - 5)
             i = i + 1;
         end
-        self.buttonFrame:SetSize(50, 10 + ((#self.items+1)*40))
+        self.buttonFrame:SetSize(50, 10 + ((#self.items+2)*40))
         self.buttonFrame:ClearAllPoints()
         self.buttonFrame:SetPoint("TOPLEFT", self, "BOTTOMLEFT", 0, -6)
 
@@ -754,7 +655,7 @@ function EquipmentFlyoutFrameMixin:Update()
             button:SetPoint("LEFT", (i * 40) + 5, rowOffset)
             i = i + 1;
         end
-        self.buttonFrame:SetSize(10 + ((#self.items+1)*40), 50)
+        self.buttonFrame:SetSize(10 + ((#self.items+2)*40), 50)
         self.buttonFrame:ClearAllPoints()
         self.buttonFrame:SetPoint("LEFT", self, "RIGHT", 6, 0)
 

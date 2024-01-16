@@ -72,8 +72,14 @@ function TBDSimpleIconLabelFrameMixin:SetDataBinding(binding, height)
         self.icon:SetTexture(binding.icon)
     end
 
-    if binding.iconCoords then
-        self.icon:SetTexCoord(binding.iconCoords[1], binding.iconCoords[2], binding.iconCoords[3], binding.iconCoords[4])
+    if binding.atlasRight then
+        self.iconRight:SetAtlas(binding.atlasRight)
+    elseif binding.iconRight then
+        self.iconRight:SetTexture(binding.iconRight)
+    end
+
+    if binding.iconCoordsRight then
+        self.icon:SetTexCoord(binding.iconCoordsRight[1], binding.iconCoordsRight[2], binding.iconCoordsRight[3], binding.iconCoordsRight[4])
     else
         self.icon:SetTexCoord(0,1,0,1)
     end
@@ -87,6 +93,9 @@ function TBDSimpleIconLabelFrameMixin:SetDataBinding(binding, height)
     if binding.iconSize then
         self.icon:SetSize(binding.iconSize[1], binding.iconSize[2])
     end
+    if binding.iconSizeRight then
+        self.icon:SetSize(binding.iconSizeRight[1], binding.iconSizeRight[2])
+    end
 
     if binding.showMask then
         self.mask:Show()
@@ -96,8 +105,16 @@ function TBDSimpleIconLabelFrameMixin:SetDataBinding(binding, height)
         self.icon:SetPoint("LEFT", 3, 0)
     else
         self.mask:Hide()
-        -- local x, y = self.icon:GetSize()
-        -- self.icon:SetSize(x - 2, y - 2)
+    end
+
+    if binding.showMaskRight then
+        self.maskRight:Show()
+        local x, y = self.iconRight:GetSize()
+        self.iconRight:SetSize(x + 6, y + 6)
+        self.iconRight:ClearAllPoints()
+        self.iconRight:SetPoint("RIGHT", -3, 0)
+    else
+        self.maskRight:Hide()
     end
 
     if binding.onUpdate then
@@ -171,6 +188,7 @@ function TBDSimpleIconLabelFrameMixin:ResetDataBinding()
     self:SetScript("OnLeave", nil)
     self:EnableMouse(false)
     self.icon:SetTexture(nil)
+    self.iconRight:SetTexture(nil)
     self.label:SetText("")
     self.labelRight:SetText("")
     self.rightButton:SetScript("OnClick", nil)

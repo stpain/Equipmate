@@ -117,6 +117,21 @@
                         <MaskedTexture childKey="icon"/>
                     </MaskedTextures>
                 </MaskTexture>
+				<Texture parentKey="iconRight">
+					<Size x="32" y="32"/>				
+					<Anchors>
+						<Anchor point="RIGHT" x="-5" y="0"/>
+					</Anchors>
+				</Texture>
+                <MaskTexture parentKey="maskRight" file="Interface/CHARACTERFRAME/TempPortraitAlphaMask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE" hidden="true">
+                    <Size x="30" y="30"/>	
+                    <Anchors>
+                        <Anchor point="RIGHT" x="-5" y="0"/>
+                    </Anchors>
+                    <MaskedTextures>
+                        <MaskedTexture childKey="iconRight"/>
+                    </MaskedTextures>
+                </MaskTexture>
                 <FontString parentKey="label" inherits="GameFontWhite" justifyH="LEFT">
                     <Anchors>
                         <Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.icon" x="6" y="0"/>
