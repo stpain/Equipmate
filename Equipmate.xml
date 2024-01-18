@@ -44,7 +44,7 @@
 
     <Frame name="EquipmateUI" mixin="EquipmateMixin" parent="PaperDollFrame" inherits="ButtonFrameTemplate" frameStrata="HIGH" enableMouse="true" hidden="true">
 
-        <Size x="300" y="420"/>
+        <Size x="450" y="430"/>
         <Anchors>
             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="0" y="-11"/>
         </Anchors>
@@ -87,9 +87,9 @@
             </Frame>
 
             <Button parentKey="selectOutfitDropdown" inherits="TBDDropDownTemplate,TBDBaseTooltipButton" text="New Outfit">
-                <Size x="140" y="34"/>
+                <Size x="146" y="34"/>
                 <Anchors>
-                    <Anchor point="TOP" x="-20" y="-26"/>
+                    <Anchor point="TOPLEFT" x="60" y="-26"/>
                 </Anchors>
                 <KeyValues>
                     <KeyValue key="tooltipTitle" value="EQUIPMATE_UI_OUTFIT_SELECT_DROPDOWN_TOOLTIP_TITLE" type="global"/>
@@ -107,13 +107,43 @@
                 </KeyValues>
             </Button>
 
-            <Button parentKey="rescanOutfit" inherits="TBDSquareSlotButton">
+            <Button parentKey="outfitStats" inherits="TBDSquareSlotButton">
                 <Anchors>
                     <Anchor point="RIGHT" relativeKey="$parent.outfitConfig" relativePoint="LEFT" x="-4" y="0"/>
                 </Anchors>
                 <KeyValues>
+                    <KeyValue key="tooltipTitle" value="EQUIPMATE_UI_OUTFIT_STATS_TOOLTIP_TITLE" type="global"/>
+                    <KeyValue key="tooltipText" value="EQUIPMATE_UI_OUTFIT_STATS_TOOLTIP_TEXT" type="global"/>
+                </KeyValues>
+            </Button>
+
+            <Button parentKey="rescanOutfit" inherits="TBDSquareSlotButton">
+                <Anchors>
+                    <Anchor point="RIGHT" relativeKey="$parent.outfitStats" relativePoint="LEFT" x="-4" y="0"/>
+                </Anchors>
+                <KeyValues>
                     <KeyValue key="tooltipTitle" value="EQUIPMATE_UI_RESCAN_BUTTON_TOOLTIP_TITLE" type="global"/>
                     <KeyValue key="tooltipText" value="EQUIPMATE_UI_RESCAN_BUTTON_TOOLTIP_TEXT" type="global"/>
+                </KeyValues>
+            </Button>
+
+            <Button parentKey="swapScanOutfit" inherits="TBDSquareSlotButton">
+                <Anchors>
+                    <Anchor point="RIGHT" relativeKey="$parent.rescanOutfit" relativePoint="LEFT" x="-4" y="0"/>
+                </Anchors>
+                <KeyValues>
+                    <KeyValue key="tooltipTitle" value="EQUIPMATE_UI_SWAP_SCAN_BUTTON_TOOLTIP_TITLE" type="global"/>
+                    <KeyValue key="tooltipText" value="EQUIPMATE_UI_SWAP_SCAN_BUTTON_TOOLTIP_TEXT" type="global"/>
+                </KeyValues>
+            </Button>
+
+            <Button parentKey="outfitItems" inherits="TBDSquareSlotButton">
+                <Anchors>
+                    <Anchor point="RIGHT" relativeKey="$parent.swapScanOutfit" relativePoint="LEFT" x="-4" y="0"/>
+                </Anchors>
+                <KeyValues>
+                    <KeyValue key="tooltipTitle" value="EQUIPMATE_UI_OUTFIT_ITEMS_TOOLTIP_TITLE" type="global"/>
+                    <KeyValue key="tooltipText" value="EQUIPMATE_UI_OUTFIT_ITEMS_TOOLTIP_TEXT" type="global"/>
                 </KeyValues>
             </Button>
 
@@ -129,6 +159,90 @@
                     <KeyValue key="elementHeight" value="22" type="number"/>
                 </KeyValues>
             </Frame>
+
+
+            <Frame parentKey="statsContainer" hidden="true">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parentInset" x="0" y="-2"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$parentInset" x="-2" y="2"/>
+                </Anchors>
+                <Frames>
+
+                    <Frame parentKey="attributes" inherits="EquipmateCharacterStatsSection">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="0" y="0"/>
+                        </Anchors>
+                        <Size x="146" y="150"/>
+                        <KeyValues>
+                            <KeyValue key="iconAtlas" value="GarrMission_MissionIcon-Recruit" type="string"/>
+                            <KeyValue key="headerText" value="Attributes" type="string"/>
+                        </KeyValues>
+                    </Frame>
+
+                    <Frame parentKey="defence" inherits="EquipmateCharacterStatsSection">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeKey="$parent.attributes" relativePoint="RIGHT" x="0" y="0"/>
+                        </Anchors>
+                        <Size x="146" y="150"/>
+                        <KeyValues>
+                            <KeyValue key="iconAtlas" value="GarrMission_MissionIcon-Defense" type="string"/>
+                            <KeyValue key="headerText" value="Defence" type="string"/>
+                        </KeyValues>
+                    </Frame>
+
+                    <Frame parentKey="resistances" inherits="EquipmateCharacterStatsSection">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeKey="$parent.defence" relativePoint="RIGHT" x="0" y="0"/>
+                        </Anchors>
+                        <Size x="146" y="150"/>
+                        <KeyValues>
+                            <KeyValue key="iconAtlas" value="GarrMission_MissionIcon-Generic" type="string"/>
+                            <KeyValue key="headerText" value="Resistances" type="string"/>
+                        </KeyValues>
+                    </Frame>
+
+                    <Frame parentKey="melee" inherits="EquipmateCharacterStatsSection">
+                        <Anchors>
+                            <Anchor point="TOP" relativeKey="$parent.attributes" relativePoint="BOTTOM" x="0" y="-10"/>
+                            <Anchor point="BOTTOMLEFT" x="0" y="0"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="iconAtlas" value="GarrMission_MissionIcon-Combat" type="string"/>
+                            <KeyValue key="headerText" value="Melee" type="string"/>
+                        </KeyValues>
+                    </Frame>
+
+                    <Frame parentKey="ranged" inherits="EquipmateCharacterStatsSection">
+                        <Size x="146"/>
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativeKey="$parent.melee" relativePoint="TOPRIGHT" x="0" y="0"/>
+                            <Anchor point="BOTTOMLEFT" relativeKey="$parent.melee" relativePoint="BOTTOMRIGHT" x="0" y="0"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="iconAtlas" value="GarrMission_MissionIcon-Patrol" type="string"/>
+                            <KeyValue key="headerText" value="Ranged" type="string"/>
+                        </KeyValues>
+                    </Frame>
+
+                    <Frame parentKey="spell" inherits="EquipmateCharacterStatsSection">
+                        <Size x="146"/>
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativeKey="$parent.ranged" relativePoint="TOPRIGHT" x="0" y="0"/>
+                            <Anchor point="BOTTOMLEFT" relativeKey="$parent.ranged" relativePoint="BOTTOMRIGHT" x="0" y="0"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="iconAtlas" value="GarrMission_MissionIcon-Training" type="string"/>
+                            <KeyValue key="headerText" value="Spells" type="string"/>
+                        </KeyValues>
+                    </Frame>
+
+                </Frames>
+            </Frame>
+
+
+
+
+
 
             <Button parentKey="newOutfit" inherits="UIPanelButtonTemplate" text="New">
                 <Size x="98" y="22"/>

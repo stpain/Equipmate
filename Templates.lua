@@ -125,6 +125,10 @@ function TBDSimpleIconLabelFrameMixin:SetDataBinding(binding, height)
         self:SetScript("OnMouseDown", binding.onMouseDown)
         self:EnableMouse(true)
     end
+    if binding.onMouseUp then
+        self:SetScript("OnMouseUp", binding.onMouseUp)
+        self:EnableMouse(true)
+    end
 
     if binding.onMouseEnter then
         self:SetScript("OnEnter", binding.onMouseEnter)
@@ -146,39 +150,6 @@ function TBDSimpleIconLabelFrameMixin:SetDataBinding(binding, height)
             GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
         end)
     end
-
-    -- if binding.getItemInfoFromID then
-    --     if binding.itemID then
-    --         local item = Item:CreateFromItemID(binding.itemID)
-    --         if not item:IsItemEmpty() then
-    --             item:ContinueOnItemLoad(function()
-    --                 local link = item:GetItemLink()
-    --                 self.label:SetText(link)
-    --                 self:EnableMouse(true)
-    --                 self:SetScript("OnEnter", function()
-    --                     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    --                     GameTooltip:SetHyperlink(link)
-    --                     GameTooltip:Show()
-    --                 end)
-    --                 -- self:SetScript("OnLeave", function()
-    --                 --     GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-    --                 -- end)
-    --                 self:SetScript("OnMouseDown", function()
-    --                     if IsControlKeyDown() then
-	-- 						DressUpItemLink(link)
-	-- 					elseif IsShiftKeyDown() then
-	-- 						HandleModifiedItemClick(link)
-	-- 					end
-    --                     if binding.onMouseDown then
-    --                         binding.onMouseDown()
-    --                     end
-    --                 end)
-
-    --                 addon:TriggerEvent("Profile_OnItemDataLoaded")
-    --             end)
-    --         end
-    --     end
-    -- end
 
     --self.anim:Play()
 end
@@ -286,3 +257,13 @@ function EquipmentFlyoutButtonMixin:ClearItem()
     self.topLeft:SetText(nil)
 end
 
+
+
+
+
+
+EquipmateCharacterStatsSectionMixin = {}
+function EquipmateCharacterStatsSectionMixin:OnLoad()
+    self.header:SetText(self.headerText)
+    self.icon:SetAtlas(self.iconAtlas)
+end

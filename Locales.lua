@@ -10,7 +10,16 @@ locales.enUS = {
     TT_PAPERDOLL_TOGGLE_BUTTON_TEXT = "|cffffffffLeft click for quick swap\nRight click to show manager",
 
     UI_RESCAN_BUTTON_TOOLTIP_TITLE = "Rescan equipment",
-    UI_RESCAN_BUTTON_TOOLTIP_TEXT = "Scan your characters equipment and update the current outfit.",
+    UI_RESCAN_BUTTON_TOOLTIP_TEXT = "Scan your characters equipment and update the current outfit.", --\n|cff33ccffThis will overwrite the currently selected outfit.",
+
+    UI_SWAP_SCAN_BUTTON_TOOLTIP_TITLE = "Swap and Scan",
+    UI_SWAP_SCAN_BUTTON_TOOLTIP_TEXT = "Equipmate will attempt to equip the outfit items, scan your characters stats and then swap back to your current gear. Requires items to be available and accessible.\n|cff33ccffIt takes a few seconds to perform this operation.",
+
+    UI_OUTFIT_ITEMS_TOOLTIP_TITLE = "Items",
+    UI_OUTFIT_ITEMS_TOOLTIP_TEXT = "View the outfit items",
+
+    UI_OUTFIT_STATS_TOOLTIP_TITLE = "Stats",
+    UI_OUTFIT_STATS_TOOLTIP_TEXT = "View character stats for an outfit. Select an outfit from the dropdown and click the 'Swap and Scan' button.\n|cff33ccffEquipmate will display the stats from the previous Swap and Scan, if the outfit changed this may be outdated information.",
 
     UI_OUTFIT_SELECT_DROPDOWN_TOOLTIP_TITLE = "Select outfit",
     UI_OUTFIT_SELECT_DROPDOWN_TOOLTIP_TEXT = "Your outfits will be listed here. Select an outfit to view its items.\nIf an outfit is selected you can rescan to update the items.",

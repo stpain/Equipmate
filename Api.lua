@@ -6,6 +6,34 @@ local Database = addon.Database;
 
 Equipmate.Api = {}
 
+function Equipmate.Api.FindItemLocationbyLink(itemLink)
+    for bag = 0, 4 do
+        for slot = 1, C_Container.GetContainerNumSlots(bag) do
+            local link = C_Container.GetContainerItemLink(bag, slot)
+            if link == itemLink then
+                return bag, slot;
+            end
+        end
+    end
+    if Equipmate.Constants.IsBankOpen then
+        for slot = 1, C_Container.GetContainerNumSlots(-1) do
+            local link = C_Container.GetContainerItemLink(-1, slot)
+            if link == itemLink then
+                return -1, slot;
+            end
+        end
+        for bag = 5, 11 do
+            for slot = 1, C_Container.GetContainerNumSlots(bag) do
+                local link = C_Container.GetContainerItemLink(bag, slot)
+                if link == itemLink then
+                    return bag, slot;
+                end
+            end
+        end
+    end
+end
+
+
 ---Scan the players currently equipped items
 ---@return table equipment an ipairs table of items
 function Equipmate.Api.GetPlayerEquipment()
@@ -31,7 +59,7 @@ function Equipmate.Api.GetPlayerEquipment()
                 icon = v.icon,
                 link = false,
                 guid = false,
-                slotID = false,
+                slotID = slotID,
             })
         end
     end
@@ -125,10 +153,16 @@ end
 
 ---Performs checks on the item provided to see if it fits the inventory slot and class/character skills
 ---@return boolean
-function Equipmate.Api.TestItemForClassAndSlot(unitClassID, equipLoc, itemClassID, itemSubClassID, invSlot, ignoreSkillCheck)
+function Equipmate.Api.TestItemForClassAndSlot(unitClassID, equipLoc, itemClassID, itemSubClassID, invSlot, ignoreSkillCheck, itemLink)
+
+    if itemLink then
+        print(string.format("Performing test on item: %s for slotID: %s", itemLink, invSlot))
+        print(string.format("EquipLoc: %s, classID: %s, subClassID: %s", equipLoc, itemClassID, itemSubClassID))
+    end
 
     local armorCheck, weaponCheck = false, false;
-    if (itemClassID == 2) and (not ignoreSkillCheck) then
+    if (itemClassID == 2) then
+
         local weaponSpellID = Equipmate.Constants.ItemSubClassIdToWeaponSkillSpellId[itemSubClassID]
         if type(weaponSpellID) == "number" then
             weaponCheck = IsPlayerSpell(weaponSpellID)
@@ -136,6 +170,10 @@ function Equipmate.Api.TestItemForClassAndSlot(unitClassID, equipLoc, itemClassI
 
         --override for generic (skinning knife)
         if itemSubClassID == Enum.ItemWeaponSubclass.Generic then
+            weaponCheck = true;
+        end
+
+        if ignoreSkillCheck then
             weaponCheck = true;
         end
     end
@@ -336,7 +374,7 @@ end
 
 
 
-function Equipmate.Api.EquipItemSet(items, isBankOpen)
+function Equipmate.Api.EquipItemSet(items, isBankOpen, isSwapScan)
     --these need to be checked for container types - ammo/shards etc
     local bagsWithEmptySlots = {}
     local emptySlotindex = 1
@@ -379,8 +417,12 @@ function Equipmate.Api.EquipItemSet(items, isBankOpen)
         return false;
     end
 
+    -- table.sort(items, function(a, b)
+    --     return a.slotID > b.slotID;
+    -- end)
+
     local i = 1;
-    C_Timer.NewTicker(0.01, function() --ticker might not be needed with the pre mapping of empty slots
+    C_Timer.NewTicker(0.005, function() --ticker might not be needed with the pre mapping of empty slots
         local v = items[i]
 
         if v.ignored then
@@ -441,8 +483,245 @@ function Equipmate.Api.EquipItemSet(items, isBankOpen)
 
 
         i = i + 1;
+
+        if (i > #items) and isSwapScan then
+            Equipmate.CallbackRegistry:TriggerEvent(Equipmate.Constants.CallbackEvents.OutfitOnSwapScanInitialEquip)
+        end
     end, #items)
 end
+
+
+
+
+
+function Equipmate.Api.TrimNumber(num)
+    if type(num) == 'number' then
+        local trimmed = string.format("%.1f", num)
+        return tonumber(trimmed)
+    else
+        return 1
+    end
+end
+
+
+
+
+
+
+local spellSchools = {
+    [2] = 'Holy',
+    [3] = 'Fire',
+    [4] = 'Nature',
+    [5] = 'Frost',
+    [6] = 'Shadow',
+    [7] = 'Arcane',
+}
+local statIDs = {
+    [1] = 'Strength',
+    [2] = 'Agility',
+    [3] = 'Stamina',
+    [4] = 'Intellect',
+    [5] = 'Spirit',
+}
+function Equipmate.Api.GetPaperDollStats()
+
+    --[[
+        the sub table keys (melee[this key]) should be capitalised as they are used in a locale lookup
+    ]]
+    local stats = {
+        attributes = {},
+        defence = {},
+        melee = {},
+        ranged = {},
+        spell = {},
+    }
+
+    local numSkills = GetNumSkillLines();
+    local skillIndex = 0;
+    local currentHeader = nil;
+
+    for i = 1, numSkills do
+        local skillName = select(1, GetSkillLineInfo(i));
+        local isHeader = select(2, GetSkillLineInfo(i));
+
+        if isHeader ~= nil and isHeader then
+            currentHeader = skillName;
+        else
+            if (currentHeader == "Weapon Skills" and skillName == 'Defense') then
+                skillIndex = i;
+                break;
+            end
+        end
+    end
+
+    -- local baseDef, modDef;
+    -- if (skillIndex > 0) then
+    --     baseDef = select(4, GetSkillLineInfo(skillIndex));
+    --     modDef = select(6, GetSkillLineInfo(skillIndex));
+    -- else
+    --     baseDef, modDef = UnitDefense('player')
+    -- end
+
+    -- local posBuff = 0;
+    -- local negBuff = 0;
+    -- if ( modDef > 0 ) then
+    --     posBuff = modDef;
+    -- elseif ( modDef < 0 ) then
+    --     negBuff = modDef;
+    -- end
+    -- stats.defence.defence = {
+    --     base = Equipmate.Api.TrimNumber(baseDef),
+    --     mod = Equipmate.Api.TrimNumber(modDef),
+    -- }
+
+
+    local baseDef, modDef = UnitDefense('player')
+    stats.defence.Defence = (baseDef + modDef)
+
+    local baseArmor, effectiveArmor, armr, posBuff, negBuff = UnitArmor('player');
+    stats.defence.Armor = Equipmate.Api.TrimNumber(baseArmor)
+    stats.defence.Block = Equipmate.Api.TrimNumber(GetBlockChance());
+    stats.defence.Parry = Equipmate.Api.TrimNumber(GetParryChance());
+    stats.defence.ShieldBlock = Equipmate.Api.TrimNumber(GetShieldBlock());
+    stats.defence.Dodge = Equipmate.Api.TrimNumber(GetDodgeChance());
+
+    --local expertise, offhandExpertise, rangedExpertise = GetExpertise();
+    --local base, casting = GetManaRegen();
+    stats.spell.SpellHit = 0 -- Equipmate.Api.TrimNumber(GetCombatRatingBonus(CR_HIT_SPELL) + GetSpellHitModifier());
+    stats.melee.MeleeHit = 0 --Equipmate.Api.TrimNumber(GetCombatRatingBonus(CR_HIT_MELEE) + GetHitModifier());
+    stats.ranged.RangedHit = 0 -- Equipmate.Api.TrimNumber(GetCombatRatingBonus(CR_HIT_RANGED));
+
+    stats.ranged.RangedCrit = Equipmate.Api.TrimNumber(GetRangedCritChance());
+    stats.melee.MeleeCrit = Equipmate.Api.TrimNumber(GetCritChance());
+
+    stats.spell.Haste = Equipmate.Api.TrimNumber(GetHaste());
+    stats.melee.Haste = Equipmate.Api.TrimNumber(GetMeleeHaste());
+    stats.ranged.Haste = Equipmate.Api.TrimNumber(GetRangedHaste());
+
+    local base, casting = GetManaRegen()
+    stats.spell.Mana = base and Equipmate.Api.TrimNumber(base*5) or 0;
+    stats.spell.ManaCombat = casting and Equipmate.Api.TrimNumber(casting*5) or 0;
+
+    local maxCrit, critSchool = 0, "-";
+    local maxDamage, dmgSchool = 0, "-";
+
+    stats.spell.tooltips = {
+        damage = {},
+        crit = {},
+    }
+
+    for id, school in pairs(spellSchools) do
+
+        local spellDamage = GetSpellBonusDamage(id)
+        if spellDamage > maxDamage then
+            maxDamage = spellDamage
+            dmgSchool = spellSchools[id]
+        end
+        local spellCrit = GetSpellCritChance(id)
+        if spellCrit > maxCrit then
+            maxCrit = spellCrit
+            critSchool = spellSchools[id]
+        end
+
+        table.insert(stats.spell.tooltips.damage, {
+            name = spellSchools[id],
+            val = Equipmate.Api.TrimNumber(spellDamage)
+        })
+        table.insert(stats.spell.tooltips.crit, {
+            name = spellSchools[id],
+            val = Equipmate.Api.TrimNumber(spellCrit)
+        })
+
+    end
+    stats.spell.SpellCrit = Equipmate.Api.TrimNumber(maxCrit)
+    stats.spell.SpellCritSchool = critSchool
+    stats.spell.SpellDamage = Equipmate.Api.TrimNumber(maxDamage)
+    stats.spell.SpellDamageSchool  = dmgSchool
+
+    stats.spell.HealingBonus = Equipmate.Api.TrimNumber(GetSpellBonusHealing());
+
+    local lowDmg, hiDmg, offlowDmg, offhiDmg, posBuff, negBuff, percentmod = UnitDamage("player");
+    local mainSpeed, offSpeed = UnitAttackSpeed("player");
+    local mlow = (lowDmg + posBuff + negBuff) * percentmod
+    local mhigh = (hiDmg + posBuff + negBuff) * percentmod
+    local olow = (offlowDmg + posBuff + negBuff) * percentmod
+    local ohigh = (offhiDmg + posBuff + negBuff) * percentmod
+    if mainSpeed < 1 then mainSpeed = 1 end
+    if mlow < 1 then mlow = 1 end
+    if mhigh < 1 then mhigh = 1 end
+    if olow < 1 then olow = 1 end
+    if ohigh < 1 then ohigh = 1 end
+
+    if offSpeed then
+        if offSpeed < 1 then 
+            offSpeed = 1
+        end
+        stats.melee.MeleeDmgOH = Equipmate.Api.TrimNumber((olow + ohigh) / 2.0)
+        stats.melee.MeleeDpsOH = Equipmate.Api.TrimNumber(((olow + ohigh) / 2.0) / offSpeed)
+    else
+        --offSpeed = 1
+        stats.melee.MeleeDmgOH = Equipmate.Api.TrimNumber(0)
+        stats.melee.MeleeDpsOH = Equipmate.Api.TrimNumber(0)
+    end
+    stats.melee.MeleeDmgMH = Equipmate.Api.TrimNumber((mlow + mhigh) / 2.0)
+    stats.melee.MeleeDpsMH = Equipmate.Api.TrimNumber(((mlow + mhigh) / 2.0) / mainSpeed)
+
+    local speed, lowDmg, hiDmg, posBuff, negBuff, percent = UnitRangedDamage("player");
+    local low = (lowDmg + posBuff + negBuff) * percent
+    local high = (hiDmg + posBuff + negBuff) * percent
+    if speed < 1 then speed = 1 end
+    if low < 1 then low = 1 end
+    if high < 1 then high = 1 end
+    local dmg = (low + high) / 2.0
+    stats.ranged.RangedDmg = Equipmate.Api.TrimNumber(dmg)
+    stats.ranged.RangedDps = Equipmate.Api.TrimNumber(dmg/speed)
+
+    local base, posBuff, negBuff = UnitAttackPower('player')
+    stats.melee.AttackPower = Equipmate.Api.TrimNumber(base + posBuff + negBuff)
+
+    for k, stat in ipairs(statIDs) do
+        local baseStat, effectiveStat, pos, neg = UnitStat("player", k);
+        table.insert(stats.attributes, {
+            id = k,
+            name = stat,
+            val = Equipmate.Api.TrimNumber(baseStat),
+        })
+    end
+
+    return stats;
+end
+
+local resistanceIDs = {
+    [0] = "Physical",
+    [1] = "Holy",
+    [2] = "Fire",
+    [3] = "Nature",
+    [4] = "Frost",
+    [5] = "Shadow",
+    [6] = "Arcane",
+}
+function Equipmate.Api.GetPlayerResistances()
+    local res = {}
+    for i = 0, 6 do
+        local base, total, bonus, minus = UnitResistance("player", i)
+
+        table.insert(res, {
+            name = resistanceIDs[i],
+            base = base,
+            total = total,
+            bonus = bonus,
+            minus = minus,
+        })
+
+    end
+    return res;
+end
+
+
+
+
+
+
 
 
 

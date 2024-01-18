@@ -50,7 +50,9 @@ Equipmate.Constants.CallbackEvents = {
 
     BankFrameStateChanged = "BankFrame_StateChanged",
 
-    OutfitSetSlotIgnore = "Outfit_SetSlotIgnore"
+    OutfitSetSlotIgnore = "Outfit_SetSlotIgnore",
+
+    OutfitOnSwapScanInitialEquip = "Outfit_OnSwapScanInitialEquip",
 }
 
 Equipmate.Constants.IsBankOpen = false;

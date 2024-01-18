@@ -189,7 +189,6 @@ function EquipmateMixin:OnLoad()
 
     self.outfitConfig.icon:SetTexture("Interface/WorldMap/Gear_64")
     self.outfitConfig.icon:SetTexCoord(0, 0.5, 0, 0.5)
-
     self.outfitConfig:SetScript("OnClick", function()
         self:OutfitConfig_OnClick()
     end)
@@ -197,6 +196,33 @@ function EquipmateMixin:OnLoad()
     self.rescanOutfit.icon:SetAtlas("transmog-icon-revert")
     self.rescanOutfit:SetScript("OnClick", function()
         self:RescanEquipment(true)
+    end)
+
+    --self.outfitItems.icon:SetAtlas("UI-LFG-RoleIcon-Generic")
+    self.outfitItems.icon:SetAtlas("charactercreate-icon-customize-torso-selected")
+    self.outfitItems.icon:ClearAllPoints()
+    self.outfitItems.icon:SetPoint("TOPLEFT", -2, 2)
+    self.outfitItems.icon:SetPoint("BOTTOMRIGHT", 2, -2)
+    self.outfitItems:SetScript("OnClick", function()
+        self.statsContainer:Hide()
+        self.equipmentListview:Show()
+    end)
+
+    --self.outfitStats.icon:SetAtlas("UI-LFG-PendingMark")
+    self.outfitStats.icon:SetAtlas("charactercreate-gendericon-female-selected")
+    self.outfitStats.icon:SetDrawLayer("BACKGROUND")
+    self.outfitStats:SetScript("OnClick", function()
+        self.statsContainer:Show()
+        self.equipmentListview:Hide()
+    end)
+
+    self.swapScanOutfit.icon:SetAtlas("Garr_SwapIcon")
+    self.swapScanOutfit:SetScript("OnClick", function()
+        
+        if self.selectedOutfit and self.selectedOutfit.items then
+            self.swapScanReturnOutfit = Equipmate.Api.GetPlayerEquipment()
+            Equipmate.Api.EquipItemSet(self.selectedOutfit.items, self.isBankOpen, true)
+        end
     end)
 
 
@@ -211,6 +237,8 @@ function EquipmateMixin:OnLoad()
 
     Equipmate.CallbackRegistry:RegisterCallback(Equipmate.Constants.CallbackEvents.BankFrameStateChanged, self.SetBankState, self)
     Equipmate.CallbackRegistry:RegisterCallback(Equipmate.Constants.CallbackEvents.OutfitSetSlotIgnore, self.SetSlotIgnore, self)
+
+    Equipmate.CallbackRegistry:RegisterCallback(Equipmate.Constants.CallbackEvents.OutfitOnSwapScanInitialEquip, self.PerformSwapScanReturn, self)
 
 
     self.characterHelptip:SetText(L.CHARACTER_HELPTIP)
@@ -239,6 +267,21 @@ function EquipmateMixin:OnLoad()
         end
     end)
 
+end
+
+function EquipmateMixin:PerformSwapScanReturn()
+    C_Timer.After(1.0, function()
+        local resistances = Equipmate.Api.GetPlayerResistances()
+        local stats = Equipmate.Api.GetPaperDollStats()
+
+        if self.selectedOutfit then
+            self.selectedOutfit.resistances = resistances
+            self.selectedOutfit.stats = stats
+        end
+
+        self:LoadOutfitStats(resistances, stats)
+        Equipmate.Api.EquipItemSet(self.swapScanReturnOutfit, self.isBankOpen)
+    end)
 end
 
 function EquipmateMixin:OutfitConfig_OnClick()
@@ -367,7 +410,7 @@ function EquipmateMixin:OnNewOutfit(outfit)
     local currentEquipment = Equipmate.Api.GetPlayerEquipment()
     outfit.items = currentEquipment;
 
-    self:LoadOutfitItems(outfit.items)
+    self:LoadOutfitItems(outfit)
 end
 
 function EquipmateMixin:RescanEquipment(updateSelectedOutfit)
@@ -383,7 +426,7 @@ function EquipmateMixin:UpdateOutfitItems(outfit, items)
     if not outfit then
         if self.selectedOutfit and self.selectedOutfit.name then
             self.selectedOutfit.items = items;
-            self:LoadOutfitItems(self.selectedOutfit.items)
+            self:LoadOutfitItems(self.selectedOutfit)
             print(string.format("[%s] updated outfit items for - %s", addonName, self.selectedOutfit.name))
         end
     end
@@ -393,11 +436,11 @@ function EquipmateMixin:OnOutfitSelected(outfit)
     self.selectedOutfit = outfit;
     self.deleteOutfit:SetEnabled(true)
     self.equipOutfit:SetEnabled(true)
-    self:LoadOutfitItems(outfit.items)
+    self:LoadOutfitItems(outfit)
 end
 
 function EquipmateMixin:OnOutfitChanged(outfit)
-    self:LoadOutfitItems(outfit.items)
+    self:LoadOutfitItems(outfit)
 end
 
 function EquipmateMixin:Database_OnOutfitDeleted()
@@ -442,29 +485,172 @@ function EquipmateMixin:ApplySelectedOutfit(name)
 
 end
 
-function EquipmateMixin:LoadOutfitItems(items)
+function EquipmateMixin:LoadOutfitItems(outfit)
 
-    local outfitItemInfo = Equipmate.Api.GetInfoForEquipmentSetItems(items)
-    self.outfitInfoLeft:SetText(string.format("%d items", outfitItemInfo.numItems))
-    self.outfitInfoRight:SetText(string.format("Ilvl %s", outfitItemInfo.averageItemLevel))
+    if not outfit.items then
+        self.equipmentListview.scrollView:SetDataProvider(CreateDataProvider({}))
+        return
+    end
 
-    local t = {}
-    for k, item in ipairs(items) do
-        table.insert(t, {
-            label = item.link,
-            --iconRight = (item.ignored == true) and 255352 or nil,
-            icon = item.icon,
-            iconSize = { 22, 22 },
-            onMouseEnter = function(f)
-                if item.link then
-                    GameTooltip:SetOwner(f, "ANCHOR_RIGHT")
-                    GameTooltip:SetHyperlink(item.link)
-                    GameTooltip:Show()
-                end
-            end,
+    if outfit.resistances and outfit.stats then
+        self:LoadOutfitStats(outfit.resistances, outfit.stats)
+    end
+
+    -- local outfitItemInfo = Equipmate.Api.GetInfoForEquipmentSetItems(outfit.items)
+    -- self.outfitInfoLeft:SetText(string.format("%d items", outfitItemInfo.numItems))
+    -- self.outfitInfoRight:SetText(string.format("Ilvl %s", outfitItemInfo.averageItemLevel))
+
+    local characterInfo = Database:GetCharacterInfo(addon.thisCharacter)
+    if characterInfo and characterInfo.classID then
+        local t = {}
+        for k, item in ipairs(outfit.items) do
+            table.insert(t, {
+                label = item.link,
+                --iconRight = (item.ignored == true) and 255352 or nil,
+                icon = item.icon,
+                iconSize = { 22, 22 },
+                onMouseEnter = function(f)
+                    if item.link then
+                        GameTooltip:SetOwner(f, "ANCHOR_RIGHT")
+                        GameTooltip:SetHyperlink(item.link)
+                        GameTooltip:Show()
+                    end
+
+                    if CursorHasItem() then
+                        local infoType, itemID, itemLink = GetCursorInfo()
+                        if infoType == "item" then
+                            local _, _, _, equipLoc, icon, itemClassID, itemSubClassID = GetItemInfoInstant(itemLink)
+                            if equipLoc and itemClassID and itemSubClassID then
+                                local match = Equipmate.Api.TestItemForClassAndSlot(characterInfo.classID, equipLoc, itemClassID, itemSubClassID, item.slotID, false, itemLink)
+                                if match then
+                                    local itemLoc = C_Cursor.GetCursorItem()
+                                    if itemLoc then
+                                        local guid = C_Item.GetItemGUID(itemLoc)
+                                        if guid then
+                                            item.link = itemLink
+                                            item.guid = guid
+                                            Equipmate.CallbackRegistry:TriggerEvent(Equipmate.Constants.CallbackEvents.DatabaseOnOutfitChanged, outfit)
+                                            ClearCursor()
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+
+                end,
+            })
+        end
+        self.equipmentListview.scrollView:SetDataProvider(CreateDataProvider(t))
+    end
+
+end
+
+function EquipmateMixin:LoadOutfitStats(resistances, stats)
+
+    local res = {}
+    for k, v in ipairs(resistances) do
+        table.insert(res, {
+            label = string.format("|cffffffff%s|r", v.name),
+            labelRight = v.total,
+            fontObject = GameFontNormalSmall,
         })
     end
-    self.equipmentListview.scrollView:SetDataProvider(CreateDataProvider(t))
+    self.statsContainer.resistances.listview.scrollView:SetDataProvider(CreateDataProvider(res))
+
+    local attributes = {}
+    for k, v in ipairs(stats.attributes) do
+        table.insert(attributes, {
+            label = string.format("|cffffffff%s|r", v.name),
+            labelRight = v.val,
+            fontObject = GameFontNormalSmall,
+        })
+    end
+    self.statsContainer.attributes.listview.scrollView:SetDataProvider(CreateDataProvider(attributes))
+
+    local def = {}
+    for stat, val in pairs(stats.defence) do
+        table.insert(def, {
+            label = string.format("|cffffffff%s|r", stat),
+            labelRight = val,
+            fontObject = GameFontNormalSmall,
+        })
+    end
+    table.sort(def, function(a, b)
+        return a.label < b.label
+    end)
+    self.statsContainer.defence.listview.scrollView:SetDataProvider(CreateDataProvider(def))
+
+    local melee = {}
+    for stat, val in pairs(stats.melee) do
+        table.insert(melee, {
+            label = string.format("|cffffffff%s|r", stat),
+            labelRight = val,
+            fontObject = GameFontNormalSmall,
+        })
+    end
+    table.sort(melee, function(a, b)
+        return a.label < b.label
+    end)
+    self.statsContainer.melee.listview.scrollView:SetDataProvider(CreateDataProvider(melee))
+
+    local ranged = {}
+    for stat, val in pairs(stats.ranged) do
+        table.insert(ranged, {
+            label = string.format("|cffffffff%s|r", stat),
+            labelRight = val,
+            fontObject = GameFontNormalSmall,
+        })
+    end
+    table.sort(ranged, function(a, b)
+        return a.label < b.label
+    end)
+    self.statsContainer.ranged.listview.scrollView:SetDataProvider(CreateDataProvider(ranged))
+
+    local spell = {}
+    for stat, val in pairs(stats.spell) do
+        if type(val) == "number" then
+            if stat == "SpellCrit" then
+                table.insert(spell, {
+                    label = string.format("|cffffffff%s|r", stat),
+                    labelRight = val,
+                    fontObject = GameFontNormalSmall,
+                    onMouseEnter = function(f)
+                        GameTooltip:SetOwner(f, "ANCHOR_RIGHT")
+                        GameTooltip:AddLine(" ")
+                        for k, v in ipairs(stats.spell.tooltips.crit) do
+                            GameTooltip:AddDoubleLine(v.name, v.val)
+                        end
+                        GameTooltip:Show()
+                    end,
+                })
+            elseif stat == "SpellDamage" then
+                table.insert(spell, {
+                    label = string.format("|cffffffff%s|r", stat),
+                    labelRight = val,
+                    fontObject = GameFontNormalSmall,
+                    onMouseEnter = function(f)
+                        GameTooltip:SetOwner(f, "ANCHOR_RIGHT")
+                        GameTooltip:AddLine(" ")
+                        for k, v in ipairs(stats.spell.tooltips.damage) do
+                            GameTooltip:AddDoubleLine(v.name, v.val)
+                        end
+                        GameTooltip:Show()
+                    end,
+                })
+            else
+                table.insert(spell, {
+                    label = string.format("|cffffffff%s|r", stat),
+                    labelRight = val,
+                    fontObject = GameFontNormalSmall,
+                })
+            end
+        end
+    end
+    table.sort(spell, function(a, b)
+        return a.label < b.label
+    end)
+    self.statsContainer.spell.listview.scrollView:SetDataProvider(CreateDataProvider(spell))
 
 end
 
