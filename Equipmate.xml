@@ -49,21 +49,6 @@
             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="0" y="-11"/>
         </Anchors>
 
-        <Layers>
-            <Layer level="OVERLAY">
-                <FontString parentKey="outfitInfoLeft" inherits="GameFontWhite">
-                    <Anchors>
-                        <Anchor point="TOPLEFT" relativeTo="$parentInset" x="2" y="-2"/>
-                    </Anchors>
-                </FontString>
-                <FontString parentKey="outfitInfoRight" inherits="GameFontWhite">
-                    <Anchors>
-                        <Anchor point="TOPRIGHT" relativeTo="$parentInset" x="-2" y="-2"/>
-                    </Anchors>
-                </FontString>
-            </Layer>
-        </Layers>
-
         <Frames>
 
             <Button parentKey="outfitHelptip" inherits="MainHelpPlateButton">
@@ -89,7 +74,7 @@
             <Button parentKey="selectOutfitDropdown" inherits="TBDDropDownTemplate,TBDBaseTooltipButton" text="New Outfit">
                 <Size x="146" y="34"/>
                 <Anchors>
-                    <Anchor point="TOPLEFT" x="60" y="-26"/>
+                    <Anchor point="TOPLEFT" x="100" y="-26"/>
                 </Anchors>
                 <KeyValues>
                     <KeyValue key="tooltipTitle" value="EQUIPMATE_UI_OUTFIT_SELECT_DROPDOWN_TOOLTIP_TITLE" type="global"/>
@@ -148,7 +133,7 @@
             </Button>
 
 
-            <Frame parentKey="equipmentListview" inherits="TBDListviewTemplate">
+            <Frame parentKey="equipmentListview" parentArray="views" inherits="TBDListviewTemplate">
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeTo="$parentInset" x="0" y="-20"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$parentInset" x="-2" y="2"/>
@@ -158,10 +143,24 @@
                     <KeyValue key="itemTemplate" value="TBDSimpleIconLabelFrame" type="string"/>
                     <KeyValue key="elementHeight" value="22" type="number"/>
                 </KeyValues>
+                <Layers>
+                    <Layer level="OVERLAY">
+                        <FontString parentKey="outfitInfoLeft" inherits="GameFontWhite">
+                            <Anchors>
+                                <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="4" y="2"/>
+                            </Anchors>
+                        </FontString>
+                        <FontString parentKey="outfitInfoRight" inherits="GameFontWhite">
+                            <Anchors>
+                                <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="-4" y="2"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
             </Frame>
 
 
-            <Frame parentKey="statsContainer" hidden="true">
+            <Frame parentKey="statsContainer" parentArray="views" hidden="true">
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeTo="$parentInset" x="0" y="-2"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$parentInset" x="-2" y="2"/>
@@ -239,7 +238,9 @@
                 </Frames>
             </Frame>
 
+            <Frame parentKey="outfitConfigPanel" parentArray="views" hidden="true">
 
+            </Frame>
 
 
 

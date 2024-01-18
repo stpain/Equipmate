@@ -6,7 +6,7 @@ local Database = addon.Database;
 
 Equipmate.Api = {}
 
-function Equipmate.Api.FindItemLocationbyLink(itemLink)
+function Equipmate.Api.FindItemContainerLocationbyLink(itemLink)
     for bag = 0, 4 do
         for slot = 1, C_Container.GetContainerNumSlots(bag) do
             local link = C_Container.GetContainerItemLink(bag, slot)
@@ -30,6 +30,16 @@ function Equipmate.Api.FindItemLocationbyLink(itemLink)
                 end
             end
         end
+    end
+end
+
+
+function Equipmate.Api.GetEquippedItemsDurability()
+    --current, maximum = GetInventoryItemDurability(invSlotId)
+    local equipment = {}
+    for k, v in ipairs(Equipmate.Constants.InventorySlots) do
+        local slotID = GetInventorySlotInfo(v.slot)
+
     end
 end
 

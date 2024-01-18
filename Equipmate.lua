@@ -187,10 +187,12 @@ function EquipmateMixin:OnLoad()
     EquipmateUIPortrait:AddMaskTexture(self.portraitMask)
     EquipmateUIPortrait:SetTexture("Interface/Addons/Equipmate/tbd-icon")
 
+
     self.outfitConfig.icon:SetTexture("Interface/WorldMap/Gear_64")
     self.outfitConfig.icon:SetTexCoord(0, 0.5, 0, 0.5)
     self.outfitConfig:SetScript("OnClick", function()
         self:OutfitConfig_OnClick()
+        self:SetView("outfitConfigPanel")
     end)
 
     self.rescanOutfit.icon:SetAtlas("transmog-icon-revert")
@@ -204,16 +206,14 @@ function EquipmateMixin:OnLoad()
     self.outfitItems.icon:SetPoint("TOPLEFT", -2, 2)
     self.outfitItems.icon:SetPoint("BOTTOMRIGHT", 2, -2)
     self.outfitItems:SetScript("OnClick", function()
-        self.statsContainer:Hide()
-        self.equipmentListview:Show()
+        self:SetView("equipmentListview")
     end)
 
     --self.outfitStats.icon:SetAtlas("UI-LFG-PendingMark")
     self.outfitStats.icon:SetAtlas("charactercreate-gendericon-female-selected")
     self.outfitStats.icon:SetDrawLayer("BACKGROUND")
     self.outfitStats:SetScript("OnClick", function()
-        self.statsContainer:Show()
-        self.equipmentListview:Hide()
+        self:SetView("statsContainer")
     end)
 
     self.swapScanOutfit.icon:SetAtlas("Garr_SwapIcon")
@@ -267,6 +267,15 @@ function EquipmateMixin:OnLoad()
         end
     end)
 
+end
+
+function EquipmateMixin:SetView(view)
+    for k, frame in ipairs(self.views) do
+        frame:Hide()
+    end
+    if self[view] then
+        self[view]:Show()
+    end
 end
 
 function EquipmateMixin:PerformSwapScanReturn()
@@ -496,16 +505,49 @@ function EquipmateMixin:LoadOutfitItems(outfit)
         self:LoadOutfitStats(outfit.resistances, outfit.stats)
     end
 
-    -- local outfitItemInfo = Equipmate.Api.GetInfoForEquipmentSetItems(outfit.items)
-    -- self.outfitInfoLeft:SetText(string.format("%d items", outfitItemInfo.numItems))
-    -- self.outfitInfoRight:SetText(string.format("Ilvl %s", outfitItemInfo.averageItemLevel))
+
+    local minIlvl, maxIlvl = 10000, 0;
+    for k, item in ipairs(outfit.items) do
+        if item.link then
+            local effectiveILvl, isPreview, baseILvl = GetDetailedItemLevelInfo(item.link)
+            if effectiveILvl <= minIlvl then
+                minIlvl = effectiveILvl
+            end
+            if effectiveILvl >= maxIlvl then
+                maxIlvl = effectiveILvl
+            end
+        end
+    end
+
+    local iLvlRange = maxIlvl - minIlvl;
+
+    local outfitItemInfo = Equipmate.Api.GetInfoForEquipmentSetItems(outfit.items)
+    self.equipmentListview.outfitInfoLeft:SetText(string.format("%d items", outfitItemInfo.numItems))
+    self.equipmentListview.outfitInfoRight:SetText(string.format("Average ilvl %s", outfitItemInfo.averageItemLevel))
 
     local characterInfo = Database:GetCharacterInfo(addon.thisCharacter)
     if characterInfo and characterInfo.classID then
         local t = {}
         for k, item in ipairs(outfit.items) do
+
+            local labelRight = ""
+
+            if item.link then
+                local effectiveILvl, isPreview, baseILvl = GetDetailedItemLevelInfo(item.link)
+
+                local percent = ((effectiveILvl - minIlvl) / iLvlRange) * 100
+                --print(string.format("ilvl %s - min %s - max %s, range %s, percent = %s", effectiveILvl, minIlvl, maxIlvl, iLvlRange, per))
+                local r = (percent > 50 and 1 - 2 * (percent - 50) / 100.0 or 1.0);
+                local g = (percent > 50 and 1.0 or 2 * percent / 100.0);
+                local b = 0.0;
+
+
+                labelRight = CreateColor(r, g, b):WrapTextInColorCode(string.format("ilvl %d", effectiveILvl))
+            end
+
             table.insert(t, {
                 label = item.link,
+                labelRight = labelRight,
                 --iconRight = (item.ignored == true) and 255352 or nil,
                 icon = item.icon,
                 iconSize = { 22, 22 },
