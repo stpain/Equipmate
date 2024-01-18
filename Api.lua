@@ -107,6 +107,30 @@ function Equipmate.Api.GetEquipmentSetsForCharacter(nameRealm)
 end
 
 
+function Equipmate.Api.GetOutfitsForContainerItem(itemGUID)
+
+    local t = {}
+
+    local outfits = Database:GetOutfits(addon.thisCharacter)
+
+    if #outfits > 0 then
+        for k, outfit in ipairs(outfits) do
+
+            if outfit.items then
+                for _, item in ipairs(outfit.items) do
+                    if item.guid == itemGUID then
+                        table.insert(t, outfit)
+                    end
+                end
+            end
+
+        end
+    end
+
+    return t;
+end
+
+
 function Equipmate.Api.GetInfoForEquipmentSetItems(items)
 
     local playerBags = {}
@@ -398,8 +422,8 @@ function Equipmate.Api.EquipItemSet(items, isBankOpen, isSwapScan)
         end
     end
 
-    --DevTools_Dump(bagsWithEmptySlots)
 
+    --make none local?
     local function equipItem(invSlot, bag, slot)
         local info = C_Container.GetContainerItemInfo(bag, slot)
         if info then
@@ -407,6 +431,13 @@ function Equipmate.Api.EquipItemSet(items, isBankOpen, isSwapScan)
             if itemLoc then
                 local itemGUID = C_Item.GetItemGUID(itemLoc)
                 if invSlot.guid == itemGUID then
+
+                    --[[
+                        TODO:
+                            it is worth adding some logic here to check against the itemLink if the guid match is false
+                            should this then update the guid value ?
+                    ]]
+
 
                     --this seems to work well with the bank items
                     --the logic is to pick up the new item and swap with what was in the slot
@@ -427,9 +458,6 @@ function Equipmate.Api.EquipItemSet(items, isBankOpen, isSwapScan)
         return false;
     end
 
-    -- table.sort(items, function(a, b)
-    --     return a.slotID > b.slotID;
-    -- end)
 
     local i = 1;
     C_Timer.NewTicker(0.005, function() --ticker might not be needed with the pre mapping of empty slots

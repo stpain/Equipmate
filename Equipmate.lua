@@ -372,6 +372,36 @@ function EquipmateMixin:Database_OnInitialised()
     self:CreateOutfitDropdownMenu()
 
     CreatePaperDollButtons()
+
+    local function baganator()
+
+        Baganator.API.RegisterItemSetSource("Equipmate", "equipmate", function(itemLocation, guid)
+
+            local outfits = Equipmate.Api.GetOutfitsForContainerItem(guid)
+            -- use the location or guid to generate a table like this:
+            -- return {
+            --   {name = "First Equipment Set", iconTexture = 3802},
+            --   {name = "Another Equipment Set This Item Happens To Be In", iconTexture = 3223},
+            -- }
+
+            local t = {}
+
+            if #outfits > 0 then
+                for _, outfit in ipairs(outfits) do
+                    table.insert(t, {
+                        name = outfit.name
+                    })
+                end
+
+                return t;
+            end
+            --nothing returned so ?
+        end)
+    end
+
+    if Baganator and Baganator.API then
+        baganator()
+    end
 end
 
 function EquipmateMixin:PlayerEnteringWorld()

@@ -73,6 +73,7 @@ function Database:GetOutfits(nameRealm)
                     table.insert(t, v)
                 end
             end
+            return t;
         end
     end
 end
