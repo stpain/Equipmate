@@ -201,7 +201,7 @@
         </Layers>
 
         <Frames>
-            <Frame parentKey="listview" inherits="AdventureWidgetsListviewTemplate">
+            <Frame parentKey="listview" inherits="TBDListviewTemplate">
                 <Anchors>
                     <Anchor point="TOPLEFT" x="-6" y="-28"/>
                     <Anchor point="BOTTOMRIGHT" x="-6" y="0"/>
