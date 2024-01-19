@@ -51,6 +51,66 @@
 
         <Frames>
 
+            <Frame parentKey="helptip1" parentArray="helptips" inherits="TBDHelpTipTemplate">
+                <Size x="200" y="60"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" x="0" y="-20"/>
+                </Anchors>
+                <KeyValues>
+                    <KeyValue key="arrowAnchor" value="top" type="string"/>
+                </KeyValues>
+            </Frame>
+
+            <Frame parentKey="helptip2" parentArray="helptips" inherits="TBDHelpTipTemplate">
+                <Size x="200" y="100"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativePoint="RIGHT" x="0" y="0"/>
+                </Anchors>
+                <KeyValues>
+                    <KeyValue key="arrowAnchor" value="left" type="string"/>
+                </KeyValues>
+            </Frame>
+
+            <Frame parentKey="helptip3" parentArray="helptips" inherits="TBDHelpTipTemplate">
+                <Size x="200" y="60"/>
+                <Anchors>
+                    <Anchor point="TOP" relativeTo="$parentInset" relativePoint="TOP" x="0" y="-20"/>
+                </Anchors>
+                <KeyValues>
+                    <KeyValue key="arrowAnchor" value="top" type="string"/>
+                </KeyValues>
+            </Frame>
+
+            <Frame parentKey="helptip4" parentArray="helptips" inherits="TBDHelpTipTemplate">
+                <Size x="200" y="90"/>
+                <Anchors>
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" x="0" y="-20"/>
+                </Anchors>
+                <KeyValues>
+                    <KeyValue key="arrowAnchor" value="top" type="string"/>
+                </KeyValues>
+            </Frame>
+
+            <Frame parentKey="helptip5" parentArray="helptips" inherits="TBDHelpTipTemplate">
+                <Size x="200" y="90"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="0" y="0"/>
+                </Anchors>
+                <KeyValues>
+                    <KeyValue key="arrowAnchor" value="left" type="string"/>
+                </KeyValues>
+            </Frame>
+
+            <Frame parentKey="helptip6" parentArray="helptips" inherits="TBDHelpTipTemplate">
+                <Size x="220" y="130"/>
+                <Anchors>
+                    <Anchor point="TOP" relativeTo="CharacterMainHandSlot" relativePoint="BOTTOM" x="0" y="-20"/>
+                </Anchors>
+                <KeyValues>
+                    <KeyValue key="arrowAnchor" value="top" type="string"/>
+                </KeyValues>
+            </Frame>
+
             <Button parentKey="outfitHelptip" inherits="MainHelpPlateButton">
                 <Anchors>
                     <Anchor point="TOPLEFT" x="36" y="20"/>
@@ -63,13 +123,6 @@
                     <Color r="1" g="1" b="1" a=".2"/>
                 </HighlightTexture>
             </Button>
-
-            <Frame parentKey="characterHelptip" inherits="TBDHelpTipTemplate_NoArrow" hidden="true">
-                <Anchors>
-                    <Anchor point="TOPRIGHT" x="-60" y="-60"/>
-                </Anchors>
-                <Size x="300" y="230"/>
-            </Frame>
 
             <Button parentKey="selectOutfitDropdown" inherits="TBDDropDownTemplate,TBDBaseTooltipButton" text="New Outfit">
                 <Size x="146" y="34"/>
@@ -87,8 +140,8 @@
                     <Anchor point="TOPRIGHT" x="-7" y="-26"/>
                 </Anchors>
                 <KeyValues>
-                    <KeyValue key="tooltipTitle" value="EQUIPMATE_TT_UI_OUTFIT_CONFIG_BUTTON_TITLE" type="global"/>
-                    <KeyValue key="tooltipText" value="EQUIPMATE_TT_UI_OUTFIT_CONFIG_BUTTON_TEXT" type="global"/>
+                    <KeyValue key="tooltipTitle" value="EQUIPMATE_UI_OUTFIT_CONFIG_BUTTON_TITLE" type="global"/>
+                    <KeyValue key="tooltipText" value="EQUIPMATE_UI_OUTFIT_CONFIG_BUTTON_TEXT" type="global"/>
                 </KeyValues>
             </Button>
 

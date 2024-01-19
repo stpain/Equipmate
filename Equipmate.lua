@@ -66,8 +66,8 @@ local function CreatePaperDollButtons()
 
     toggleButton:SetScript("OnEnter", function()
         GameTooltip:SetOwner(toggleButton, "ANCHOR_RIGHT")
-        GameTooltip:AddLine(EQUIPMATE_TT_PAPERDOLL_TOGGLE_BUTTON_TITLE)
-        GameTooltip:AddLine(EQUIPMATE_TT_PAPERDOLL_TOGGLE_BUTTON_TEXT)
+        GameTooltip:AddLine(EQUIPMATE_PAPERDOLL_TOGGLE_BUTTON_TITLE)
+        GameTooltip:AddLine(EQUIPMATE_PAPERDOLL_TOGGLE_BUTTON_TEXT)
         GameTooltip:Show()
     end)
     --toggleButton.icon:SetTexture("Interface/WorldMap/Gear_64")
@@ -217,6 +217,8 @@ function EquipmateMixin:OnLoad()
     end)
 
     self.swapScanOutfit.icon:SetAtlas("Garr_SwapIcon")
+    self.swapScanOutfit.icon:SetPoint("TOPLEFT", 2, -2)
+    self.swapScanOutfit.icon:SetPoint("BOTTOMRIGHT", -2, 2)
     self.swapScanOutfit:SetScript("OnClick", function()
         
         if self.selectedOutfit and self.selectedOutfit.items then
@@ -241,10 +243,9 @@ function EquipmateMixin:OnLoad()
     Equipmate.CallbackRegistry:RegisterCallback(Equipmate.Constants.CallbackEvents.OutfitOnSwapScanInitialEquip, self.PerformSwapScanReturn, self)
 
 
-    self.characterHelptip:SetText(L.CHARACTER_HELPTIP)
     --self.outfitHelptip:SetScale(0.8)
     self.outfitHelptip:SetScript("OnClick", function()
-        self.characterHelptip:SetShown(not self.characterHelptip:IsVisible())
+        self:LaunchTuturial()
     end)
     self.equipOutfit:SetEnabled(false)
     self.equipOutfit:SetScript("OnClick", function()
@@ -295,6 +296,45 @@ function EquipmateMixin:OnLoad()
         end
     end)
 
+
+    self:SetupTuturial()
+
+end
+
+function EquipmateMixin:SetupTuturial()
+    for k, v in ipairs(self.helptips) do
+        v.next:Show()
+        v:Hide()
+    end
+
+    self.helptip1:SetText(EQUIPMATE_HELPTIP_NEW_OUTFIT)
+    self.helptip2:SetText(EQUIPMATE_HELPTIP_DRAG_DROP_LISTVIEW)
+    self.helptip3:SetText(EQUIPMATE_HELPTIP_DROPDOWN_CONTROLS)
+    self.helptip4:SetText(EQUIPMATE_HELPTIP_EQUIP_OUTFIT)
+    self.helptip5:SetText(EQUIPMATE_HELPTIP_RIBBON_CONTROLS)
+    self.helptip6:SetText(EQUIPMATE_HELPTIP_PAPERDOLL)
+
+    local function helptip_onNextClick(id)
+        self["helptip"..id]:Hide()
+
+        if self["helptip"..(id+1)] then
+            self["helptip"..(id+1)]:Show()
+        end
+    end
+
+    for i = 1, #self.helptips do
+        self["helptip"..i].next:SetScript("OnClick", function()
+            helptip_onNextClick(i)
+        end)
+    end
+
+end
+
+function EquipmateMixin:LaunchTuturial()
+    for k, v in ipairs(self.helptips) do
+        v:Hide()
+    end
+    self.helptip1:Show()
 end
 
 function EquipmateMixin:SetView(view)

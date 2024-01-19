@@ -72,6 +72,7 @@
         "ITEM_WOW_TOKEN_COLOR",
         "NIGHT_FAE_BLUE_COLOR",
         "NECROLORD_GREEN_COLOR",
-        "WHITE_FONT_COLOR"
+        "WHITE_FONT_COLOR",
+        "NEXT"
     ]
 }
