@@ -32,6 +32,9 @@ Equipmate.ContextMenuSeparator = {
 
 Equipmate.Constants = {}
 
+-- Equipmate.Constants.Colours = {}
+-- Equipmate.Constants.Colours.BlizzardBlue = CreateColor(0.2, 0.8, 1.0, 1.0)
+
 Equipmate.Constants.PaperDollInventorySlotToggleButtons = {}
 
 Equipmate.Constants.BlizzardEvents = {

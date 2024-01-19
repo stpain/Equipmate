@@ -267,6 +267,34 @@ function EquipmateMixin:OnLoad()
         end
     end)
 
+
+    --this isn't perfect as it uses itemlinks which could be none unique
+    GameTooltip:HookScript('OnTooltipSetItem', function(tooltip)
+        local _, link = tooltip:GetItem()
+        if link then
+            local bag, slot = Equipmate.Api.FindItemContainerLocationbyLink(link)
+            if type(bag) == "number" and type(slot) == "number" then
+                local itemLoc = CreateFromMixins(ItemLocationMixin)
+                itemLoc:SetBagAndSlot(bag, slot)
+                local guid = C_Item.GetItemGUID(itemLoc)
+                if guid then
+                    local outfits = Equipmate.Api.GetOutfitsForContainerItem(guid)
+                    if #outfits > 0 then
+                        GameTooltip_AddBlankLineToTooltip(GameTooltip);
+                        --tooltip:AddLine(BLUE_FONT_COLOR:WrapTextInColorCode(addonName))
+                        GameTooltip_AddColoredLine(GameTooltip, EQUIPMATE_ITEM_TOOLTIP_EQUIPMENT_SET_ITEM_HEADER_LINE, BLUE_FONT_COLOR);
+                        for _, outfit in ipairs(outfits) do
+                            --tooltip:AddLine(TRANSMOGRIFY_FONT_COLOR:WrapTextInColorCode(outfit.name))
+                            --GameTooltip_AddColoredLine(GameTooltip, outfit.name, NECROLORD_GREEN_COLOR);
+                            GameTooltip_AddColoredLine(GameTooltip, outfit.name, WHITE_FONT_COLOR);
+                        end
+                        GameTooltip_AddBlankLineToTooltip(GameTooltip);
+                    end
+                end
+            end
+        end
+    end)
+
 end
 
 function EquipmateMixin:SetView(view)
@@ -392,9 +420,9 @@ function EquipmateMixin:Database_OnInitialised()
                         name = outfit.name
                     })
                 end
-
-                return t;
             end
+
+            return t;
             --nothing returned so ?
         end)
     end
@@ -540,11 +568,13 @@ function EquipmateMixin:LoadOutfitItems(outfit)
     for k, item in ipairs(outfit.items) do
         if item.link then
             local effectiveILvl, isPreview, baseILvl = GetDetailedItemLevelInfo(item.link)
-            if effectiveILvl <= minIlvl then
-                minIlvl = effectiveILvl
-            end
-            if effectiveILvl >= maxIlvl then
-                maxIlvl = effectiveILvl
+            if effectiveILvl then
+                if effectiveILvl <= minIlvl then
+                    minIlvl = effectiveILvl
+                end
+                if effectiveILvl >= maxIlvl then
+                    maxIlvl = effectiveILvl
+                end
             end
         end
     end
@@ -564,15 +594,17 @@ function EquipmateMixin:LoadOutfitItems(outfit)
 
             if item.link then
                 local effectiveILvl, isPreview, baseILvl = GetDetailedItemLevelInfo(item.link)
+                if effectiveILvl then
 
-                local percent = ((effectiveILvl - minIlvl) / iLvlRange) * 100
-                --print(string.format("ilvl %s - min %s - max %s, range %s, percent = %s", effectiveILvl, minIlvl, maxIlvl, iLvlRange, per))
-                local r = (percent > 50 and 1 - 2 * (percent - 50) / 100.0 or 1.0);
-                local g = (percent > 50 and 1.0 or 2 * percent / 100.0);
-                local b = 0.0;
+                    local percent = ((effectiveILvl - minIlvl) / iLvlRange) * 100
+                    --print(string.format("ilvl %s - min %s - max %s, range %s, percent = %s", effectiveILvl, minIlvl, maxIlvl, iLvlRange, per))
+                    local r = (percent > 50 and 1 - 2 * (percent - 50) / 100.0 or 1.0);
+                    local g = (percent > 50 and 1.0 or 2 * percent / 100.0);
+                    local b = 0.0;
 
 
-                labelRight = CreateColor(r, g, b):WrapTextInColorCode(string.format("ilvl %d", effectiveILvl))
+                    labelRight = CreateColor(r, g, b):WrapTextInColorCode(string.format("ilvl %d", effectiveILvl))
+                end
             end
 
             table.insert(t, {
@@ -593,7 +625,7 @@ function EquipmateMixin:LoadOutfitItems(outfit)
                         if infoType == "item" then
                             local _, _, _, equipLoc, icon, itemClassID, itemSubClassID = GetItemInfoInstant(itemLink)
                             if equipLoc and itemClassID and itemSubClassID then
-                                local match = Equipmate.Api.TestItemForClassAndSlot(characterInfo.classID, equipLoc, itemClassID, itemSubClassID, item.slotID, false, itemLink)
+                                local match = Equipmate.Api.TestItemForClassAndSlot(characterInfo.classID, equipLoc, itemClassID, itemSubClassID, item.slotID, false)
                                 if match then
                                     local itemLoc = C_Cursor.GetCursorItem()
                                     if itemLoc then
@@ -642,11 +674,17 @@ function EquipmateMixin:LoadOutfitStats(resistances, stats)
 
     local def = {}
     for stat, val in pairs(stats.defence) do
-        table.insert(def, {
-            label = string.format("|cffffffff%s|r", stat),
-            labelRight = val,
-            fontObject = GameFontNormalSmall,
-        })
+
+        if stat == "tooltips" then
+            
+        else
+            table.insert(def, {
+                label = string.format("|cffffffff%s|r", stat),
+                labelRight = val,
+                fontObject = GameFontNormalSmall,
+            })
+        end
+
     end
     table.sort(def, function(a, b)
         return a.label < b.label

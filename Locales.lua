@@ -31,6 +31,8 @@ locales.enUS = {
 
     FLYOUT_IGNORE_SLOT = "Ignore slot",
     FLYOUT_PUT_IN_BAG = "Put item in bag",
+
+    ITEM_TOOLTIP_EQUIPMENT_SET_ITEM_HEADER_LINE = "Part of the following outfits",
 }
 
 

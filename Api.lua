@@ -118,7 +118,7 @@ function Equipmate.Api.GetOutfitsForContainerItem(itemGUID)
 
             if outfit.items then
                 for _, item in ipairs(outfit.items) do
-                    if item.guid == itemGUID then
+                    if type(item.guid) == "string" and (item.guid == itemGUID) then
                         table.insert(t, outfit)
                     end
                 end
@@ -166,8 +166,10 @@ function Equipmate.Api.GetInfoForEquipmentSetItems(items)
         -- end
         if type(v.link) == "string" then
             local effectiveILvl, isPreview, baseILvl = GetDetailedItemLevelInfo(v.link)
-            ret.numItems = ret.numItems + 1
-            ret.totalItemLevel = ret.totalItemLevel + effectiveILvl;
+            if effectiveILvl then
+                ret.numItems = ret.numItems + 1
+                ret.totalItemLevel = ret.totalItemLevel + effectiveILvl;
+            end
         end
         if type(v.guid) == "string" then
             --print(v.link, v.guid)
@@ -409,6 +411,11 @@ end
 
 
 function Equipmate.Api.EquipItemSet(items, isBankOpen, isSwapScan)
+
+    if UnitAffectingCombat("player") then
+        return false;
+    end
+
     --these need to be checked for container types - ammo/shards etc
     local bagsWithEmptySlots = {}
     local emptySlotindex = 1
@@ -460,7 +467,7 @@ function Equipmate.Api.EquipItemSet(items, isBankOpen, isSwapScan)
 
 
     local i = 1;
-    C_Timer.NewTicker(0.005, function() --ticker might not be needed with the pre mapping of empty slots
+    C_Timer.NewTicker(0.0025, function() --ticker might not be needed with the pre mapping of empty slots
         local v = items[i]
 
         if v.ignored then
@@ -514,6 +521,7 @@ function Equipmate.Api.EquipItemSet(items, isBankOpen, isSwapScan)
                     --unequipping unsuccessful so place item back
                     if CursorHasItem() then
                         PickupInventoryItem(GetInventorySlotInfo(v.slot))
+                        UIErrorsFrame:AddMessage(ERR_EQUIPMENT_MANAGER_BAGS_FULL, 1.0, 0.1, 0.1, 1.0);
                     end
                 end
             end
@@ -522,8 +530,12 @@ function Equipmate.Api.EquipItemSet(items, isBankOpen, isSwapScan)
 
         i = i + 1;
 
-        if (i > #items) and isSwapScan then
-            Equipmate.CallbackRegistry:TriggerEvent(Equipmate.Constants.CallbackEvents.OutfitOnSwapScanInitialEquip)
+        if (i > #items) then
+            if isSwapScan then
+                Equipmate.CallbackRegistry:TriggerEvent(Equipmate.Constants.CallbackEvents.OutfitOnSwapScanInitialEquip)
+            else
+                --return true;
+            end
         end
     end, #items)
 end
@@ -622,6 +634,10 @@ function Equipmate.Api.GetPaperDollStats()
     stats.defence.Parry = Equipmate.Api.TrimNumber(GetParryChance());
     stats.defence.ShieldBlock = Equipmate.Api.TrimNumber(GetShieldBlock());
     stats.defence.Dodge = Equipmate.Api.TrimNumber(GetDodgeChance());
+
+    -- stats.defence.tooltips = {
+
+    -- }
 
     --local expertise, offhandExpertise, rangedExpertise = GetExpertise();
     --local base, casting = GetManaRegen();

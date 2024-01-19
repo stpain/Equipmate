@@ -57,6 +57,21 @@
         "ITEM_MOD_STRENGTH_SHORT",
         "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_STAMINA_SHORT",
-        "SPECIALIZATION"
+        "SPECIALIZATION",
+        "UIErrorsFrame",
+        "ERR_EQUIPMENT_MANAGER_BAGS_FULL",
+        "BATTLENET_FONT_COLOR",
+        "BRIGHTBLUE_FONT_COLOR",
+        "BLUE_FONT_COLOR",
+        "TRANSMOGRIFY_FONT_COLOR",
+        "GameTooltip_AddColoredLine",
+        "RUNEFORGE_LEGENDARY_POWER_LABEL",
+        "GameTooltip_AddBlankLineToTooltip",
+        "DARKYELLOW_FONT_COLOR",
+        "SET_ITEM_COLOR",
+        "ITEM_WOW_TOKEN_COLOR",
+        "NIGHT_FAE_BLUE_COLOR",
+        "NECROLORD_GREEN_COLOR",
+        "WHITE_FONT_COLOR"
     ]
 }
