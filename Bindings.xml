@@ -26,7 +26,7 @@
     <Binding name="Equipment Set ID 9" category="Equipmate ">
         Equipmate.Api.EquipItemsFromKeyBinding(9)
     </Binding>
-    <Binding name="Equipment Set ID 10" category="Equipmate ">
+<Binding name="Equipment Set ID 10" category="Equipmate ">
         Equipmate.Api.EquipItemsFromKeyBinding(10)
     </Binding>
 </Bindings>

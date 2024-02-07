@@ -42,7 +42,7 @@
 	</Frame>
 
 
-    <Frame name="EquipmateUI" mixin="EquipmateMixin" parent="PaperDollFrame" inherits="ButtonFrameTemplate" frameStrata="HIGH" enableMouse="true" hidden="true">
+    <Frame name="EquipmateUI" mixin="EquipmateMixin" parent="PaperDollFrame" inherits="ButtonFrameTemplate" frameStrata="HIGH" enableMouse="true" hidden="true" movable="true">
 
         <Size x="450" y="430"/>
         <Anchors>
@@ -291,7 +291,68 @@
                 </Frames>
             </Frame>
 
-            <Frame parentKey="outfitConfigPanel" parentArray="views" hidden="true">
+            <Frame parentKey="configPanel" parentArray="views" hidden="true">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parentInset" x="0" y="-2"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$parentInset" x="-2" y="2"/>
+                </Anchors>
+
+                <Frames>
+                    <Frame parentKey="header">
+                        <Size y="50"/>
+                        <Anchors>
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Anchors>
+                        <Layers>
+                            <Layer level="ARTWORK">
+                                <FontString parentKey="title" inherits="GameFontHighlightHuge" justifyH="LEFT" text="Config">
+                                    <Anchors>
+                                        <Anchor point="TOPLEFT" x="12" y="-22"/>
+                                    </Anchors>
+                                </FontString>
+                                <!-- <FontString inherits="GameFontNormal" justifyH="LEFT" text="When applies">
+                                    <Anchors>
+                                        <Anchor point="TOPLEFT" x="12" y="-60"/>
+                                    </Anchors>
+                                </FontString>
+                                <FontString inherits="GameFontNormal" justifyH="RIGHT" text="Equip">
+                                    <Anchors>
+                                        <Anchor point="TOPRIGHT" x="-12" y="-60"/>
+                                    </Anchors>
+                                </FontString> -->
+                                <Texture atlas="Options_HorizontalDivider">
+                                    <Size y="1"/>
+                                    <Anchors>
+                                        <Anchor point="TOPLEFT" x="10" y="-50"/>
+                                        <Anchor point="TOPRIGHT" x="-10" y="-50"/>
+                                    </Anchors>
+                                </Texture>
+                            </Layer>
+                        </Layers>
+                        <Frames>
+                            <Button parentKey="defaultsButton" inherits="UIPanelButtonTemplate">
+                                <Size x="96" y="22"/>
+                                <Anchors>
+                                    <Anchor point="TOPRIGHT" x="-36" y="-16"/>
+                                </Anchors>
+                            </Button>
+                            <!-- <Button parentKey="addConfigButton" inherits="UIPanelButtonTemplate">
+                                <Size x="96" y="22"/>
+                                <Anchors>
+                                    <Anchor point="TOPRIGHT" x="-36" y="-16"/>
+                                </Anchors>
+                            </Button> -->
+                        </Frames>
+                    </Frame>
+        
+                    <Frame parentKey="listview" inherits="TBDNoTemplateListviewTemplate">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativeKey="$parent.header" relativePoint="BOTTOMLEFT" x="0" y="-10"/>
+                            <Anchor point="BOTTOMRIGHT" x="-10" y="0"/>
+                        </Anchors>
+                    </Frame>
+                </Frames>
 
             </Frame>
 

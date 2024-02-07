@@ -54,8 +54,16 @@ Equipmate.Constants.CallbackEvents = {
     BankFrameStateChanged = "BankFrame_StateChanged",
 
     OutfitSetSlotIgnore = "Outfit_SetSlotIgnore",
-
+    OutfitOnItemsEquipped = "Outfit_OnItemsEquipped",
     OutfitOnSwapScanInitialEquip = "Outfit_OnSwapScanInitialEquip",
+}
+
+-- events usable by other addons
+Equipmate.Constants.EventRegistryCallbacks = {
+    Database_OnNewOutfit = "EQUIPMATE_ON_OUTFIT_CREATED",
+    Database_OnOutfitDeleted = "EQUIPMATE_ON_OUTFIT_DELETED",
+    Database_OnOutfitChanged = "EQUIPMATE_ON_OUTFIT_CHANGED",
+    Outfit_OnItemsEquipped = "EQUIPMATE_ON_OUTFIT_EQUIPPED",
 }
 
 Equipmate.Constants.IsBankOpen = false;
@@ -263,4 +271,9 @@ Equipmate.Constants.ItemStatGlobals = {
     Strength = ITEM_MOD_STRENGTH_SHORT,
     Spirit = ITEM_MOD_SPIRIT_SHORT,
     Stamina = ITEM_MOD_STAMINA_SHORT,
+}
+
+Equipmate.Constants.ConfigEvents = {
+    GROUP_ROSTER_UPDATE = true,
+    ZONE_CHANGED_NEW_AREA = true,
 }

@@ -169,7 +169,11 @@ end
 
 
 
+--[[
+    Equipmate main UI
 
+    This is the main frame for managing outfits
+]]
 
 
 
@@ -180,6 +184,8 @@ EquipmateMixin = {
 function EquipmateMixin:OnLoad()
 
     self:SetTitle(addonName)
+
+    self:RegisterForDrag("LeftButton")
 
     self.portraitMask = self:CreateMaskTexture()
     self.portraitMask:SetAllPoints(EquipmateUIPortrait)
@@ -192,7 +198,7 @@ function EquipmateMixin:OnLoad()
     self.outfitConfig.icon:SetTexCoord(0, 0.5, 0, 0.5)
     self.outfitConfig:SetScript("OnClick", function()
         self:OutfitConfig_OnClick()
-        self:SetView("outfitConfigPanel")
+        self:SetView("configPanel")
     end)
 
     self.rescanOutfit.icon:SetAtlas("transmog-icon-revert")
@@ -223,13 +229,17 @@ function EquipmateMixin:OnLoad()
         
         if self.selectedOutfit and self.selectedOutfit.items then
             self.swapScanReturnOutfit = Equipmate.Api.GetPlayerEquipment()
-            Equipmate.Api.EquipItemSet(self.selectedOutfit.items, self.isBankOpen, true)
+            Equipmate.Api.EquipItemSet(self.selectedOutfit, self.isBankOpen, true)
         end
     end)
 
 
     for k, v in pairs(Equipmate.Constants.BlizzardEvents) do
         self:RegisterEvent(v)
+    end
+
+    for k, v in pairs(Equipmate.Constants.ConfigEvents) do
+        self:RegisterEvent(k)
     end
 
     Equipmate.CallbackRegistry:RegisterCallback("Database_OnInitialised", self.Database_OnInitialised, self)
@@ -241,7 +251,6 @@ function EquipmateMixin:OnLoad()
     Equipmate.CallbackRegistry:RegisterCallback(Equipmate.Constants.CallbackEvents.OutfitSetSlotIgnore, self.SetSlotIgnore, self)
 
     Equipmate.CallbackRegistry:RegisterCallback(Equipmate.Constants.CallbackEvents.OutfitOnSwapScanInitialEquip, self.PerformSwapScanReturn, self)
-
 
     --self.outfitHelptip:SetScale(0.8)
     self.outfitHelptip:SetScript("OnClick", function()
@@ -357,7 +366,7 @@ function EquipmateMixin:PerformSwapScanReturn()
         end
 
         self:LoadOutfitStats(resistances, stats)
-        Equipmate.Api.EquipItemSet(self.swapScanReturnOutfit, self.isBankOpen)
+        Equipmate.Api.EquipItemSet({ name = "SWAP_SCAN_RETURN_SET", items = self.swapScanReturnOutfit, }, self.isBankOpen)
     end)
 end
 
@@ -424,6 +433,10 @@ function EquipmateMixin:OnEvent(event, ...)
     if event == Equipmate.Constants.BlizzardEvents.BankFrameClosed then
         Equipmate.CallbackRegistry:TriggerEvent(Equipmate.Constants.CallbackEvents.BankFrameStateChanged, false)
     end
+
+    if Equipmate.Constants.ConfigEvents[event] then
+        self:ApplyConfigRules()
+    end
 end
 
 function EquipmateMixin:OnShow()
@@ -439,7 +452,15 @@ end
 function EquipmateMixin:Database_OnInitialised()
     self:CreateOutfitDropdownMenu()
 
+    self:SetupConfigPanel()
+
     CreatePaperDollButtons()
+
+    -- local function foo(outfit)
+    --     DevTools_Dump(outfit.items)
+    -- end
+
+    -- Equipmate.Api.RegisterCallBack("EQUIPMATE_ON_SET_SELECTED", foo)
 
     local function baganator()
 
@@ -507,12 +528,12 @@ function EquipmateMixin:CreateSlashCommands()
     end
 end
 
-function EquipmateMixin:OnNewOutfit(outfit)
+function EquipmateMixin:OnNewOutfit(name, outfit)
     self.selectedOutfit = outfit;
     self.deleteOutfit:SetEnabled(true)
     self.equipOutfit:SetEnabled(true)
     self:CreateOutfitDropdownMenu()
-    self.selectOutfitDropdown:SetText(outfit.name)
+    self.selectOutfitDropdown:SetText(name)
 
     local currentEquipment = Equipmate.Api.GetPlayerEquipment()
     outfit.items = currentEquipment;
@@ -546,7 +567,7 @@ function EquipmateMixin:OnOutfitSelected(outfit)
     self:LoadOutfitItems(outfit)
 end
 
-function EquipmateMixin:OnOutfitChanged(outfit)
+function EquipmateMixin:OnOutfitChanged(name, outfit)
     self:LoadOutfitItems(outfit)
 end
 
@@ -588,7 +609,7 @@ function EquipmateMixin:ApplySelectedOutfit(name)
         return
     end
 
-    Equipmate.Api.EquipItemSet(self.selectedOutfit.items, self.isBankOpen)
+    Equipmate.Api.EquipItemSet(self.selectedOutfit, self.isBankOpen)
 
 end
 
@@ -673,7 +694,7 @@ function EquipmateMixin:LoadOutfitItems(outfit)
                                         if guid then
                                             item.link = itemLink
                                             item.guid = guid
-                                            Equipmate.CallbackRegistry:TriggerEvent(Equipmate.Constants.CallbackEvents.DatabaseOnOutfitChanged, outfit)
+                                            Equipmate.CallbackRegistry:TriggerEvent(Equipmate.Constants.CallbackEvents.DatabaseOnOutfitChanged, outfit.name, outfit)
                                             ClearCursor()
                                         end
                                     end
@@ -833,10 +854,135 @@ end
 
 
 
+--[[
+    ==============================
+    options panel
+    ==============================
+]]
+
+
+function EquipmateMixin:SetupConfigPanel()
+
+    self.configPanel.header.title:SetText(addon.thisCharacter)
+
+    local function spinShiftButtons(frame)
+        frame.shiftUp.icon:SetRotation(1.57)
+        frame.shiftDown.icon:SetRotation(-1.57)
+    end
+
+    local function party_onLoad(frame, data)
+
+        spinShiftButtons(frame)
+
+        frame.label:SetText(data.label)
+        local outfits = Database:GetOutfits(addon.thisCharacter)
+        local menu = {}
+        for k, v in ipairs(outfits) do
+            table.insert(menu, {
+                text = v.name,
+            })
+        end
+        frame.dropdown:SetMenu(menu)
+    end
+
+    local config = {}
+    config.party5 = {
+        label = "Party 5",
+    }
+    config.party25 = {
+        label = "Party 25",
+    }
+    config.party10 = {
+        label = "Party 10",
+    }
+    config.party40 = {
+        label = "Party 40",
+    }
+
+    local characterConfigDefaults = {
+        ["party-5"] = {
+            template = "EquipmateSettingsDropdownTemplate",
+            height = 35,
+            initializer = function(f)
+                party_onLoad(f, config.party5)
+            end,
+        },
+        ["party-10"] = {
+            template = "EquipmateSettingsDropdownTemplate",
+            height = 35,
+            initializer = function(f)
+                party_onLoad(f, config.party10)
+            end,
+        },
+        ["party-25"] = {
+            template = "EquipmateSettingsDropdownTemplate",
+            height = 35,
+            initializer = function(f)
+                party_onLoad(f, config.party25)
+            end,
+        },
+        ["party-40"] = {
+            template = "EquipmateSettingsDropdownTemplate",
+            height = 35,
+            initializer = function(f)
+                party_onLoad(f, config.party40)
+            end,
+        },
+    }
+
+    local sv = {
+        {
+            rule = "inGroup",
+            active = false,
+            priority = 0,
+            action = "none",
+        },
+        {
+            rule = "isRested",
+            active = false,
+            priority = 0,
+            action = "none",
+        },
+    }
+
+    local t = {}
+    for k, v in ipairs(sv) do
+        table.insert(t, characterConfigDefaults[v])
+    end
+    self.configPanel.listview.scrollView:SetDataProvider(CreateDataProvider(t))
+
+    local function updateListview(t)
+        -- table.sort(t, function(a, b)
+        --     return a.index < b.index;
+        -- end)
+        self.configPanel.listview.scrollView:SetDataProvider(CreateDataProvider(t))
+    end
+
+end
+
+
+
+function EquipmateMixin:ApplyConfigRules()
+
+end
 
 
 
 
+
+
+
+
+
+
+
+
+
+--[[
+    Equipmate Flyout
+
+    This is the flyout frame for the character paperdoll window inventory slots
+]]
 
 EquipmentFlyoutFrameMixin = {}
 function EquipmentFlyoutFrameMixin:OnLoad()

@@ -6,6 +6,24 @@ local Database = addon.Database;
 
 Equipmate.Api = {}
 
+--function Equipmate.Api.RegisterCallBack(event, callback)
+    -- EventRegistry:RegisterCallback(event, function(_, ...)
+    --     callback(...)
+    -- end)
+
+    -- Equipmate.CallbackRegistry:RegisterCallback(event, function(_, ...)
+    --     callback(...)
+    -- end)
+
+    -- for k, v in pairs(Equipmate.Constants.EventRegistryCallbacks) do
+    --     if event == v then
+    --         Equipmate.CallbackRegistry:RegisterCallback(event, function(_, ...)
+    --             callback(...)
+    --         end)
+    --     end
+    -- end
+--end
+
 function Equipmate.Api.FindItemContainerLocationbyLink(itemLink)
     for bag = 0, 4 do
         for slot = 1, C_Container.GetContainerNumSlots(bag) do
@@ -404,13 +422,13 @@ function Equipmate.Api.EquipItemsFromKeyBinding(id)
     
     local outfit = Database:GetOutfitFromKeyBindingID(id)
     if outfit and outfit.items then
-        Equipmate.Api.EquipItemSet(outfit.items, Equipmate.Constants.IsBankOpen)
+        Equipmate.Api.EquipItemSet(outfit, Equipmate.Constants.IsBankOpen)
     end
 end
 
 
 
-function Equipmate.Api.EquipItemSet(items, isBankOpen, isSwapScan)
+function Equipmate.Api.EquipItemSet(outfit, isBankOpen, isSwapScan)
 
     if UnitAffectingCombat("player") then
         return false;
@@ -459,16 +477,18 @@ function Equipmate.Api.EquipItemSet(items, isBankOpen, isSwapScan)
                     --C_Container.UseContainerItem(bag, slot)
 
                     return true
+
+                else
+                    return false
                 end
             end
         end
-        return false;
     end
 
-
+    local numErrors = 0
     local i = 1;
     C_Timer.NewTicker(0.0025, function() --ticker might not be needed with the pre mapping of empty slots
-        local v = items[i]
+        local v = outfit.items[i]
 
         if v.ignored then
             --do nothing user is ignoring this slot
@@ -522,6 +542,7 @@ function Equipmate.Api.EquipItemSet(items, isBankOpen, isSwapScan)
                     if CursorHasItem() then
                         PickupInventoryItem(GetInventorySlotInfo(v.slot))
                         UIErrorsFrame:AddMessage(ERR_EQUIPMENT_MANAGER_BAGS_FULL, 1.0, 0.1, 0.1, 1.0);
+                        numErrors = numErrors + 1;
                     end
                 end
             end
@@ -530,14 +551,18 @@ function Equipmate.Api.EquipItemSet(items, isBankOpen, isSwapScan)
 
         i = i + 1;
 
-        if (i > #items) then
+        if (i > #outfit.items) then
             if isSwapScan then
                 Equipmate.CallbackRegistry:TriggerEvent(Equipmate.Constants.CallbackEvents.OutfitOnSwapScanInitialEquip)
             else
-                --return true;
+                if numErrors == 0 then
+                    Equipmate.CallbackRegistry:TriggerEvent(Equipmate.Constants.CallbackEvents.OutfitOnItemsEquipped, outfit.name, true)
+                else
+                    Equipmate.CallbackRegistry:TriggerEvent(Equipmate.Constants.CallbackEvents.OutfitOnItemsEquipped, outfit.name, false)
+                end
             end
         end
-    end, #items)
+    end, #outfit.items)
 end
 
 

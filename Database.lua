@@ -12,6 +12,15 @@ local datebaseDefaults = {
     outfitBindings = {}
 }
 
+local characterConfigDefaultPriority = {
+    [1] = "party-40",
+    [2] = "party-25",
+    [3] = "party-10",
+    [4] = "party-05",
+    [5] = "rested",
+}
+
+
 function Database:Init(forceReset)
     
     if not EQUIPMATE_GLOBAL then
@@ -41,6 +50,9 @@ function Database:NewCharacter(nameRealm, classID, raceID)
             raceID = raceID,
         }
         self.db.containers[nameRealm] = {}
+    end
+    if not self.db.config[nameRealm] then
+        self.db.config[nameRealm] = {}
     end
 end
 
@@ -88,25 +100,25 @@ function Database:DeleteOutfit(name)
         end
         if keyToRemove then
             table.remove(self.db.outfits, keyToRemove)
-            Equipmate.CallbackRegistry:TriggerEvent("Database_OnOutfitDeleted")
+            Equipmate.CallbackRegistry:TriggerEvent("Database_OnOutfitDeleted", name)
         end
     end
 end
 
-function Database:NewOutfit(outfit, nameRealm)
+function Database:NewOutfit(outfitName, nameRealm)
     if self.db then
         if not self.db.outfits then
             self.db.outfits = {}
         end
         table.insert(self.db.outfits, {
-            name = outfit,
+            name = outfitName,
             character = nameRealm,
             items = {},
             icon = 0,
             config = {},
             id = time(),
         })
-        Equipmate.CallbackRegistry:TriggerEvent("Database_OnNewOutfit", self.db.outfits[#self.db.outfits])
+        Equipmate.CallbackRegistry:TriggerEvent("Database_OnNewOutfit", outfitName, self.db.outfits[#self.db.outfits])
     end
 end
 
