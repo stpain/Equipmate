@@ -102,6 +102,7 @@ function TBDDropDownListviewItemTemplateMixin:SetDataBinding(binding, height)
     end
 
     local w = self.text:GetUnboundedStringWidth() + 44
+
     if w > self.dropdown.maxWidth then
         self.dropdown.maxWidth = w;
         self.dropdown.flyout:SetWidth(self.dropdown.maxWidth + 44)

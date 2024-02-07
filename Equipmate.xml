@@ -306,9 +306,9 @@
                         </Anchors>
                         <Layers>
                             <Layer level="ARTWORK">
-                                <FontString parentKey="title" inherits="GameFontHighlightHuge" justifyH="LEFT" text="Config">
+                                <FontString parentKey="title" inherits="GameFontHighlightLarge" justifyH="LEFT" text="Config">
                                     <Anchors>
-                                        <Anchor point="TOPLEFT" x="12" y="-22"/>
+                                        <Anchor point="TOPLEFT" x="12" y="-2"/>
                                     </Anchors>
                                 </FontString>
                                 <!-- <FontString inherits="GameFontNormal" justifyH="LEFT" text="When applies">

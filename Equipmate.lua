@@ -836,17 +836,16 @@ function EquipmateMixin:CreateOutfitDropdownMenu()
     --     },
     -- }
     local outfitMenu = {}
-    local outfits = Database:GetOutfits()
+    local outfits = Database:GetOutfits(addon.thisCharacter)
+
     for i = #outfits, 1, -1 do
         local outfit = outfits[i]
-        if outfit.character == addon.thisCharacter then
-            table.insert(outfitMenu, {
-                text = outfit.name,
-                func = function()
-                    self:OnOutfitSelected(outfit)
-                end,
-            })
-        end
+        table.insert(outfitMenu, {
+            text = outfit.name,
+            func = function()
+                self:OnOutfitSelected(outfit)
+            end,
+        })
     end
     self.selectOutfitDropdown:SetMenu(outfitMenu)
 end

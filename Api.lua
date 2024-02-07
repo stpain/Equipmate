@@ -97,6 +97,10 @@ end
 
 function Equipmate.Api.GetEquipmentSetsForCharacter(nameRealm)
 
+    if not nameRealm then
+        nameRealm = addon.thisCharacter;
+    end
+
     local t = {}
 
     local outfits = Database:GetOutfits(nameRealm)
