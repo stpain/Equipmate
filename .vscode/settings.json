@@ -104,6 +104,8 @@
         "GetItemInfoInstant",
         "C_Cursor",
         "ClearCursor",
-        "Enum"
+        "Enum",
+        "StaticPopup1",
+        "StaticPopup1Button1"
     ]
 }

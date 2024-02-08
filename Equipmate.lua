@@ -713,6 +713,8 @@ end
 
 function EquipmateMixin:LoadOutfitStats(resistances, stats)
 
+    --print(Equipmate.Api.GetCurrentOutfitStatus())
+
     local res = {}
     for k, v in ipairs(resistances) do
         table.insert(res, {

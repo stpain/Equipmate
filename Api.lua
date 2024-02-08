@@ -95,38 +95,88 @@ function Equipmate.Api.GetPlayerEquipment()
 end
 
 
-function Equipmate.Api.GetEquipmentSetsForCharacter(nameRealm)
+--check the players current equipment and see if any outfits are a match
+--return the outfit name or false if none found
+function Equipmate.Api.GetCurrentOutfitStatus()
+    
+    local currentEquipment = Equipmate.Api.GetPlayerEquipment()
 
-    if not nameRealm then
-        nameRealm = addon.thisCharacter;
+    local slotIdToItemGUID = {}
+    for k, v in ipairs(currentEquipment) do
+        slotIdToItemGUID[v.slotID] = v.guid
+        --print(v.slotID, v.guid)
     end
 
-    local t = {}
+    local outfits = Database:GetOutfits(addon.thisCharacter)
 
-    local outfits = Database:GetOutfits(nameRealm)
+    for _, outfit in ipairs(outfits) do
 
-    if #outfits > 0 then
-        for k, outfit in ipairs(outfits) do
-            local copy = {}
-            for x, y in pairs(outfit) do
-                if type(y) ~= "table" then
-                    copy[x] = y;
-                else
-                    if x == "items" then
-                        local items = {}
-                        for a, b in ipairs(y) do
-                            table.insert(items, b)
-                        end
-                        copy.items = items;
-                    end
-                end
+        local slotMatches = {}
+
+        --print(outfit.name)
+
+        for _, item in ipairs(outfit.items) do
+
+            --print(item.slotID, item.guid, slotIdToItemGUID[item.slotID])
+
+            slotMatches[item.slotID] = false;
+            
+            if slotIdToItemGUID[item.slotID] == item.guid then
+                slotMatches[item.slotID] = true
             end
-            table.insert(t, copy)
+
+        end
+
+        local outfitMatch = true;
+        for _, match in pairs(slotMatches) do
+            if match == false then
+                outfitMatch = false;
+            end
+        end
+
+        if outfitMatch == true then
+            return outfit.name
         end
     end
 
-    return t;
+    return false;
 end
+
+
+--[[
+    needs more work
+]]
+-- function Equipmate.Api.GetEquipmentSetsForCharacter(nameRealm)
+
+--     if not nameRealm then
+--         nameRealm = addon.thisCharacter;
+--     end
+
+--     local t = {}
+
+--     local outfits = Database:GetOutfits(nameRealm)
+
+--     if #outfits > 0 then
+--         for k, outfit in ipairs(outfits) do
+--             local copy = {}
+--             for x, y in pairs(outfit) do
+--                 if type(y) ~= "table" then
+--                     copy[x] = y;
+--                 else
+
+--                     local t = {}
+--                     for a, b in ipairs(y) do
+--                         table.insert(t, b)
+--                     end
+--                     copy[x] = t
+--                 end
+--             end
+--             table.insert(t, copy)
+--         end
+--     end
+
+--     return t;
+-- end
 
 
 function Equipmate.Api.GetOutfitsForContainerItem(itemGUID)
