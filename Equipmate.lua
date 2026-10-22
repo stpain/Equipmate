@@ -30,7 +30,8 @@ StaticPopupDialogs.NewOutfit = {
     button1 = ACCEPT,
     button2 = CANCEL,
     OnAccept = function(self, data)
-        local str = self.EditBox:GetText()
+        local editBox = self.EditBox or self.editBox
+        local str = editBox:GetText()
         if str and (#str > 0) and (str ~= " ") then
             local outfit = str;
             Database:NewOutfit(outfit, addon.thisCharacter)
